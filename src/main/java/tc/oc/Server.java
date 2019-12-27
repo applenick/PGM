@@ -10,7 +10,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Handler;
 import java.util.regex.Pattern;
 import net.kencochrane.raven.dsn.Dsn;
@@ -18,7 +22,15 @@ import net.kencochrane.raven.event.EventBuilder;
 import net.kencochrane.raven.event.interfaces.ExceptionInterface;
 import net.kencochrane.raven.event.interfaces.StackTraceInterface;
 import net.kencochrane.raven.log4j2.SentryAppender;
-import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_8_R3.DedicatedPlayerList;
+import net.minecraft.server.v1_8_R3.DedicatedServer;
+import net.minecraft.server.v1_8_R3.DispenserRegistry;
+import net.minecraft.server.v1_8_R3.MinecraftEncryption;
+import net.minecraft.server.v1_8_R3.PropertyManager;
+import net.minecraft.server.v1_8_R3.WorldLoaderServer;
+import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.server.v1_8_R3.WorldSettings;
+import net.minecraft.server.v1_8_R3.WorldType;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -38,10 +50,19 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.PluginEvent;
-import org.bukkit.plugin.*;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginLoadOrder;
+import org.bukkit.plugin.PluginLoader;
+import org.bukkit.plugin.RegisteredListener;
+import org.bukkit.plugin.SimplePluginManager;
+import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.fusesource.jansi.AnsiConsole;
+import org.graalvm.nativeimage.ImageSingletons;
+import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.PGMImpl;
 import tc.oc.pgm.api.PGM;
@@ -396,5 +417,21 @@ public class Server extends DedicatedServer {
       raven.runBuilderHelpers(builder);
       return builder.build();
     }
+  }
+}
+
+/**
+ * Patches {@link Server} when being compiled to a GraalVM native-image binary.
+ *
+ * @link https://www.graalvm.org/docs/reference-manual/native-image/
+ */
+class ServerInit implements Feature {
+  @Override
+  public void beforeAnalysis(BeforeAnalysisAccess access) {
+    DispenserRegistry.c(); // Must be called or else "Accessed Blocks before Bootstrap!" will occur
+    RuntimeClassInitialization.initializeAtBuildTime(
+        net.minecraft.server.v1_8_R3.DispenserRegistry.class);
+    ImageSingletons.add(
+        net.minecraft.server.v1_8_R3.DispenserRegistry.class, new DispenserRegistry());
   }
 }

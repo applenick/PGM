@@ -78,6 +78,13 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.28.0</version>
         </dependency>
+        <!-- GraalVM runtime APIs for compiling static binaries -->
+        <dependency>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>graal-sdk</artifactId>
+            <version>19.3.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
@@ -244,6 +251,23 @@
                     <extraDirectories>
                         <paths>deploy</paths>
                     </extraDirectories>
+                </configuration>
+            </plugin>
+            <!-- Optionally, compile an "out-of-the-box" PGM server as a binary (does not support loading other plugins) -->
+            <plugin>
+                <groupId>org.graalvm.nativeimage</groupId>
+                <artifactId>native-image-maven-plugin</artifactId>
+                <version>19.3.0</version>
+                <configuration>
+                    <imageName>pgm</imageName>
+                    <mainClass>tc.oc.Server</mainClass>
+                    <buildArgs>
+                        --features=tc.oc.ServerInit
+                        --initialize-at-build-time=tc.oc,app.ashcon,org.bukkit,com.google,org.spigotmc,org.github,org.slf4j,org.joda,org.jdom2,com.mojang,com.fasterxml,net.kencochrane,net.md_5,net.minecraft,gnu.trove,it.unimi,org.apache,org.joda,org.sqlite,org.yaml
+                        --initialize-at-run-time=io.netty
+                        -H:+TraceClassInitialization
+                        -H:+ReportExceptionStackTraces
+                    </buildArgs>
                 </configuration>
             </plugin>
         </plugins>
