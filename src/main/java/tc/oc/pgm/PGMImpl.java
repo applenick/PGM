@@ -370,7 +370,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     node.registerNode("mode", "modes").registerCommands(new ModeCommands());
     node.registerCommands(new TimeLimitCommands());
     node.registerCommands(new SettingCommands());
-    node.registerCommands(new ModerationCommands());
+    node.registerCommands(new ModerationCommands(chat));
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
 

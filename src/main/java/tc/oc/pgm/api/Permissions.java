@@ -31,6 +31,13 @@ public interface Permissions {
   String STAFF = ROOT + ".staff"; // Considered apart of the staff team
   String RELOAD = ROOT + ".reload"; // Reload the PGM configuration
 
+  // Individual permissions related to moderation
+  String MODERATION = ROOT + ".moderation"; // General node for moderation
+  String KICK = MODERATION + ".kick"; // Access to the /kick command
+  String WARN = MODERATION + ".warn"; // Access to the /warn command
+  String MUTE = MODERATION + ".mute"; // Access to the /mute command
+  String BAN = MODERATION + ".ban"; // Access to the /ban command
+
   // Role-specific permission nodes
   Permission DEFAULT =
       new Permission(
