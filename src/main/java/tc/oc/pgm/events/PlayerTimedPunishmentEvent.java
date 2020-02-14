@@ -2,10 +2,9 @@ package tc.oc.pgm.events;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import org.bukkit.command.CommandSender;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.commands.ModerationCommands.PunishmentType;
 
@@ -29,7 +28,7 @@ public class PlayerTimedPunishmentEvent extends PlayerPunishmentEvent {
     return time;
   }
 
-  public Date getExpiryDate() {
-    return Instant.now().plus(time).toDate();
+  public Instant getExpiryDate() {
+    return Instant.now().plus(time);
   }
 }

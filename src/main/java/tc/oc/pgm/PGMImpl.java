@@ -101,7 +101,6 @@ import tc.oc.pgm.listeners.GeneralizingListener;
 import tc.oc.pgm.listeners.ItemTransferListener;
 import tc.oc.pgm.listeners.LongRangeTNTListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
-import tc.oc.pgm.listeners.ModerationListener;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
@@ -399,7 +398,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
-    registerEvents(new ModerationListener());
   }
 
   private class InGameHandler extends Handler {

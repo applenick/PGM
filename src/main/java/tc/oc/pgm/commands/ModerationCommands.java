@@ -1,25 +1,25 @@
 package tc.oc.pgm.commands;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.joda.time.Duration;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.BanList;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
@@ -44,6 +44,8 @@ public class ModerationCommands {
   private static final Sound WARN_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
   private static final Component WARN_SYMBOL =
       new PersonalizedText(" \u26a0 ").color(ChatColor.YELLOW);
+  private static final Component BROADCAST_DIV =
+      new PersonalizedText(" \u00BB ").color(ChatColor.GOLD);
 
   private static final Component CONSOLE_NAME =
       new PersonalizedTranslatable("console")
@@ -73,7 +75,7 @@ public class ModerationCommands {
       // Check for cooldown
       Instant lastReport = LAST_REPORT_SENT.getIfPresent(matchPlayer.getId());
       if (lastReport != null) {
-        java.time.Duration timeSinceReport = java.time.Duration.between(lastReport, Instant.now());
+        Duration timeSinceReport = Duration.between(lastReport, Instant.now());
         long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
         if (secondsRemaining > 0) {
           Component secondsComponent = new PersonalizedText(Long.toString(secondsRemaining));
@@ -144,7 +146,6 @@ public class ModerationCommands {
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
   }
 
-
   @Command(
       aliases = {"staff", "mods", "admins"},
       desc = "List the online staff members")
@@ -197,8 +198,19 @@ public class ModerationCommands {
       warn(sender, target, match, reason, true);
     }
 
-    // Call Event for general punishments
-    punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent);
+    // Create event and call it
+    PlayerPunishmentEvent event =
+        punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent);
+
+    // Check if cancelled, otherwise perform default actions
+    if (event.isCancelled()) {
+      if (event.getCancelMessage() != null) {
+        sender.sendMessage(event.getCancelMessage());
+      }
+      return;
+    } else {
+      broadcastPunishment(event);
+    }
   }
 
   @Command(
@@ -214,11 +226,22 @@ public class ModerationCommands {
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
-    // Send warning message to the target
-    sendWarning(targetMatchPlayer, reason);
+    // Create event and call it
+    PlayerPunishmentEvent event =
+        punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, silent);
 
-    // Call Event for general punishments
-    punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, silent);
+    // Check if cancelled, otherwise perform default actions
+    if (event.isCancelled()) {
+      if (event.getCancelMessage() != null) {
+        sender.sendMessage(event.getCancelMessage());
+      }
+      return;
+    } else {
+      broadcastPunishment(event);
+
+      // Send warning message to the target
+      sendWarning(targetMatchPlayer, reason);
+    }
   }
 
   @Command(
@@ -235,13 +258,24 @@ public class ModerationCommands {
 
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
-    // Kick the player
-    target.kickPlayer(
-        formatPunishmentScreen(
-            PunishmentType.KICK, formatPunisherName(sender, match), reason, null));
+    // Create event and call it
+    PlayerPunishmentEvent event =
+        punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent);
 
-    // Call Event for general punishments
-    punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent);
+    // Check if cancelled, otherwise perform default actions
+    if (event.isCancelled()) {
+      if (event.getCancelMessage() != null) {
+        sender.sendMessage(event.getCancelMessage());
+      }
+      return;
+    } else {
+      broadcastPunishment(event);
+
+      // Kick the player
+      target.kickPlayer(
+          formatPunishmentScreen(
+              PunishmentType.KICK, formatPunisherName(sender, match), reason, null));
+    }
   }
 
   @Command(
@@ -257,16 +291,28 @@ public class ModerationCommands {
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
-    // Ban the player
-    // TODO: Implement
+    // Create event and call it
+    PlayerPunishmentEvent event =
+        punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, silent);
 
-    // Kick the now banned player
-    target.kickPlayer(
-        formatPunishmentScreen(
-            PunishmentType.BAN, formatPunisherName(sender, match), reason, null));
+    // Check if cancelled, otherwise perform default actions
+    if (event.isCancelled()) {
+      if (event.getCancelMessage() != null) {
+        sender.sendMessage(event.getCancelMessage());
+      }
+      return;
+    } else {
+      // Broadcast punishment
+      broadcastPunishment(event);
 
-    // Call Event for general punishments
-    punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, silent);
+      // Ban the Player
+      banPlayer(event, null);
+
+      // Kick the now banned player
+      target.kickPlayer(
+          formatPunishmentScreen(
+              PunishmentType.BAN, formatPunisherName(sender, match), reason, null));
+    }
   }
 
   @Command(
@@ -283,19 +329,32 @@ public class ModerationCommands {
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
-    // Kick the now temp-banned player
-    target.kickPlayer(
-        formatPunishmentScreen(
-            PunishmentType.BAN, formatPunisherName(sender, match), reason, banLength));
-
     // Special event called for TEMP ban
-    PlayerTimedPunishmentEvent tempBanEvent =
+    PlayerTimedPunishmentEvent event =
         new PlayerTimedPunishmentEvent(
             sender, targetMatchPlayer, PunishmentType.TEMP_BAN, reason, silent, banLength);
-    match.callEvent(tempBanEvent);
+    match.callEvent(event);
+
+    if (event.isCancelled()) {
+      if (event.getCancelMessage() != null) {
+        sender.sendMessage(event.getCancelMessage());
+      }
+      return;
+    } else {
+      // Broadcast punishment
+      broadcastPunishment(event);
+
+      // Ban the player
+      banPlayer(event, event.getExpiryDate());
+
+      // Kick the now banned player
+      target.kickPlayer(
+          formatPunishmentScreen(
+              PunishmentType.BAN, formatPunisherName(sender, match), reason, banLength));
+    }
   }
 
-  private void punish(
+  private PlayerPunishmentEvent punish(
       PunishmentType type,
       MatchPlayer target,
       CommandSender issuer,
@@ -303,6 +362,8 @@ public class ModerationCommands {
       boolean silent) {
     PlayerPunishmentEvent event = new PlayerPunishmentEvent(issuer, target, type, reason, silent);
     target.getMatch().callEvent(event);
+
+    return event;
   }
 
   public static enum PunishmentType {
@@ -310,7 +371,7 @@ public class ModerationCommands {
     WARN(false),
     KICK(true),
     BAN(true),
-    TEMP_BAN(false);
+    TEMP_BAN(true);
 
     private String PREFIX_TRANSLATE_KEY = "moderation.type.";
     private String SCREEN_TRANSLATE_KEY = "moderation.screen.";
@@ -365,8 +426,8 @@ public class ModerationCommands {
   /*
    * Formatting of Kick Screens (KICK/BAN/TEMPBAN)
    */
-  public String formatPunishmentScreen(
-      PunishmentType type, Component punisher, String reason, Duration expires) {
+  public static String formatPunishmentScreen(
+      PunishmentType type, Component punisher, String reason, @Nullable Duration expires) {
     List<Component> lines = Lists.newArrayList();
 
     Component header =
@@ -387,7 +448,9 @@ public class ModerationCommands {
 
     // If punishment expires, inform user when
     if (expires != null) {
-      Component timeLeft = PeriodFormats.briefNaturalApproximate(expires);
+      Component timeLeft =
+          PeriodFormats.briefNaturalApproximate(
+              org.joda.time.Duration.standardSeconds(expires.getSeconds()));
       lines.add(
           new PersonalizedTranslatable("moderation.screen.expires", timeLeft)
               .getPersonalizedText()
@@ -433,5 +496,55 @@ public class ModerationCommands {
     Component subtitle = formatPunishmentReason(reason).color(ChatColor.GOLD);
 
     target.showTitle(title, subtitle, 5, 200, 10);
+  }
+
+  private void broadcastPunishment(PlayerPunishmentEvent event) {
+    broadcastPunishment(
+        event.getType(),
+        event.getPlayer().getMatch(),
+        event.getSender(),
+        event.getPlayer(),
+        event.getReason(),
+        event.isSilent());
+  }
+
+  private void broadcastPunishment(
+      PunishmentType type,
+      Match match,
+      CommandSender sender,
+      MatchPlayer target,
+      String reason,
+      boolean silent) {
+    Component prefix =
+        new PersonalizedTranslatable("moderation.punishment.prefix", type.getPunishmentPrefix())
+            .getPersonalizedText()
+            .color(ChatColor.GOLD);
+    Component targetName = target.getStyledName(NameStyle.FANCY);
+    Component reasonMsg = ModerationCommands.formatPunishmentReason(reason);
+    Component formattedMsg =
+        new PersonalizedText(
+            prefix,
+            Components.space(),
+            ModerationCommands.formatPunisherName(sender, match),
+            BROADCAST_DIV,
+            targetName,
+            BROADCAST_DIV,
+            reasonMsg);
+
+    if (!silent) {
+      match.sendMessage(formattedMsg);
+    } else {
+      // if silent flag present, only notify sender
+      sender.sendMessage(formattedMsg);
+    }
+  }
+
+  private void banPlayer(PlayerPunishmentEvent event, @Nullable Instant expires) {
+    Bukkit.getBanList(BanList.Type.NAME)
+        .addBan(
+            event.getPlayer().getBukkit().getName(),
+            event.getReason(),
+            expires != null ? Date.from(expires) : null,
+            event.getSender().getName());
   }
 }
