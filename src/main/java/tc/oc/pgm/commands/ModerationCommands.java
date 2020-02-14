@@ -1,23 +1,25 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.joda.time.Duration;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
+
+import app.ashcon.intake.Command;
+import app.ashcon.intake.CommandException;
+import app.ashcon.intake.parametric.annotation.Switch;
+import app.ashcon.intake.parametric.annotation.Text;
+import net.md_5.bungee.api.ChatColor;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
@@ -28,6 +30,8 @@ import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerPunishmentEvent;
 import tc.oc.pgm.events.PlayerReportEvent;
 import tc.oc.pgm.events.PlayerTimedPunishmentEvent;
@@ -51,6 +55,8 @@ public class ModerationCommands {
 
   private final Cache<UUID, Instant> LAST_REPORT_SENT =
       CacheBuilder.newBuilder().expireAfterWrite(REPORT_COOLDOWN_SECONDS, TimeUnit.SECONDS).build();
+
+  private static final Sound REPORT_NOTIFY_SOUND = new Sound("random.pop", 1f, 1.2f);
 
   @Command(
       aliases = {"report"},
@@ -127,37 +133,41 @@ public class ModerationCommands {
 
     match.getPlayers().stream()
         .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
-        .forEach(viewer -> viewer.sendMessage(prefixedComponent));
+        .forEach(
+            viewer -> {
+              // Play sound for viewers of reports
+              if (viewer.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
+                viewer.playSound(REPORT_NOTIFY_SOUND);
+              }
+              viewer.sendMessage(prefixedComponent);
+            });
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
   }
+
 
   @Command(
       aliases = {"staff", "mods", "admins"},
       desc = "List the online staff members")
   public void staff(CommandSender sender, Match match) {
     // List of online staff
-    List<MatchPlayer> onlineStaff =
+    List<Component> onlineStaff =
         match.getPlayers().stream()
             .filter(player -> player.getBukkit().hasPermission(Permissions.STAFF))
-            .collect(Collectors.toList());
-    // List of formatted names
-    List<Component> onlineNames =
-        onlineStaff.stream()
-            .map(pl -> pl.getStyledName(NameStyle.FANCY))
+            .map(player -> player.getStyledName(NameStyle.FANCY))
             .collect(Collectors.toList());
 
     // FORMAT: Online Staff ({count}): {names}
     Component staffCount =
         new PersonalizedText(Integer.toString(onlineStaff.size()))
-            .color(onlineStaff.size() >= 1 ? ChatColor.AQUA : ChatColor.RED);
+            .color(onlineStaff.isEmpty() ? ChatColor.RED : ChatColor.AQUA);
 
-    BaseComponent content =
+    Component content =
         onlineStaff.isEmpty()
             ? new PersonalizedTranslatable("moderation.staff.empty")
                 .getPersonalizedText()
                 .color(ChatColor.RED)
-                .render()
-            : Components.join(new PersonalizedText(", ").color(ChatColor.GRAY), onlineNames);
+            : new Component(
+                Components.join(new PersonalizedText(", ").color(ChatColor.GRAY), onlineStaff));
 
     Component staff =
         new PersonalizedTranslatable("moderation.staff.name", staffCount, content)
