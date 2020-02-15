@@ -145,45 +145,44 @@ public class ChatDispatcher implements Listener {
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
-    // If muted, don't allow direct message
     if (isMuted(sender)) {
       sendMutedMessage(sender);
-    } else {
-      MatchPlayer matchReceiver = manager.getPlayer(receiver);
-      if (matchReceiver != null) {
-        SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
-
-        if (option.equals(SettingValue.MESSAGE_OFF)
-            && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
-          String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
-          Component component =
-              new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
-          sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
-          return;
-        }
-        playMessageSound(matchReceiver);
-      }
-
-      if (sender != null) {
-        lastMessagedBy.put(receiver, sender.getId());
-      }
-
-      send(
-          match,
-          sender,
-          message,
-          "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] {0}: {1}",
-          viewer -> viewer.getBukkit().equals(receiver),
-          null);
-
-      send(
-          match,
-          manager.getPlayer(receiver), // Allow for cross-match messages
-          message,
-          "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
-          viewer -> viewer.getBukkit().equals(sender.getBukkit()),
-          null);
+      return;
     }
+    MatchPlayer matchReceiver = manager.getPlayer(receiver);
+    if (matchReceiver != null) {
+      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
+
+      if (option.equals(SettingValue.MESSAGE_OFF)
+          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
+        String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
+        Component component =
+            new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
+        sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
+        return;
+      }
+      playMessageSound(matchReceiver);
+    }
+
+    if (sender != null) {
+      lastMessagedBy.put(receiver, sender.getId());
+    }
+
+    send(
+        match,
+        sender,
+        message,
+        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] {0}: {1}",
+        viewer -> viewer.getBukkit().equals(receiver),
+        null);
+
+    send(
+        match,
+        manager.getPlayer(receiver), // Allow for cross-match messages
+        message,
+        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
+        viewer -> viewer.getBukkit().equals(sender.getBukkit()),
+        null);
   }
 
   @Command(
@@ -246,8 +245,14 @@ public class ChatDispatcher implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMutePlayer(PlayerPunishmentEvent event) {
     if (event.getType().equals(PunishmentType.MUTE)) {
-      // Add muted player to set after command runs
-      addMuted(event.getPlayer());
+      if (isMuted(event.getPlayer())) {
+        Component errorMsg =
+            new PersonalizedTranslatable(
+                    "moderation.mute.existing", event.getPlayer().getStyledName(NameStyle.FANCY))
+                .getPersonalizedText()
+                .color(ChatColor.RED);
+        event.setCancelled(true, errorMsg);
+      }
     }
   }
 
@@ -293,20 +298,20 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    if (!isMuted(sender)) {
-      final Component component =
-          new PersonalizedText(
-              Components.format(
-                  format,
-                  sender == null
-                      ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
-                      : sender.getStyledName(NameStyle.FANCY),
-                  new PersonalizedText(message.trim())));
-      match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
-      Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
-    } else {
+    if (isMuted(sender)) {
       sendMutedMessage(sender);
+      return;
     }
+    final Component component =
+        new PersonalizedText(
+            Components.format(
+                format,
+                sender == null
+                    ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
+                    : sender.getStyledName(NameStyle.FANCY),
+                new PersonalizedText(message.trim())));
+    match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
+    Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
   }
 
   private void sendMutedMessage(MatchPlayer player) {

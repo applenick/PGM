@@ -51,7 +51,7 @@ public class ModerationCommands {
   private static final Component CONSOLE_NAME =
       new PersonalizedTranslatable("console")
           .getPersonalizedText()
-          .color(ChatColor.YELLOW)
+          .color(ChatColor.DARK_AQUA)
           .italic(true);
 
   private static final int REPORT_COOLDOWN_SECONDS = 15;
@@ -200,23 +200,18 @@ public class ModerationCommands {
       @Switch('w') boolean warn) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
-    // if -w, also warn the player but don't broadcast warning
+    // if -w flag, also warn the player but don't broadcast warning
     if (warn) {
       warn(sender, target, match, reason, true);
     }
 
-    // Create event and call it
     PlayerPunishmentEvent event =
         punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent);
-
-    // Check if cancelled, otherwise perform default actions
-    if (event.isCancelled()) {
-      if (event.getCancelMessage() != null) {
-        sender.sendMessage(event.getCancelMessage());
-      }
-      return;
-    } else {
+    if (!event.isCancelled()) {
       broadcastPunishment(event);
+      chat.addMuted(targetMatchPlayer);
+    } else if (event.getCancelMessage() != null) {
+      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -228,14 +223,13 @@ public class ModerationCommands {
   public void unMute(CommandSender sender, Player target, Match match) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (chat.isMuted(targetMatchPlayer)) {
-      // Remove the mute
       chat.removeMuted(targetMatchPlayer);
 
-      // Send feedback to target and sender
       targetMatchPlayer.sendMessage(
           new PersonalizedTranslatable("moderation.unmute.target")
               .getPersonalizedText()
               .color(ChatColor.GREEN));
+
       sender.sendMessage(
           new PersonalizedTranslatable(
                   "moderation.unmute.sender", targetMatchPlayer.getStyledName(NameStyle.FANCY))
@@ -261,23 +255,13 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-
-    // Create event and call it
     PlayerPunishmentEvent event =
         punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, silent);
-
-    // Check if cancelled, otherwise perform default actions
-    if (event.isCancelled()) {
-      if (event.getCancelMessage() != null) {
-        sender.sendMessage(event.getCancelMessage());
-      }
-      return;
-    } else {
-      // Broadcast the punishment
+    if (!event.isCancelled()) {
       broadcastPunishment(event);
-
-      // Send warning message to the target
       sendWarning(targetMatchPlayer, reason);
+    } else if (event.getCancelMessage() != null) {
+      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -292,27 +276,16 @@ public class ModerationCommands {
       Match match,
       @Text String reason,
       @Switch('s') boolean silent) {
-
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-
-    // Create event and call it
     PlayerPunishmentEvent event =
         punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent);
-
-    // Check if cancelled, otherwise perform default actions
-    if (event.isCancelled()) {
-      if (event.getCancelMessage() != null) {
-        sender.sendMessage(event.getCancelMessage());
-      }
-      return;
-    } else {
-      // Broadcast the punishment
+    if (!event.isCancelled()) {
       broadcastPunishment(event);
-
-      // Kick the player
       target.kickPlayer(
           formatPunishmentScreen(
               PunishmentType.KICK, formatPunisherName(sender, match), reason, null));
+    } else if (event.getCancelMessage() != null) {
+      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -328,28 +301,16 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-
-    // Create event and call it
     PlayerPunishmentEvent event =
         punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, silent);
-
-    // Check if cancelled, otherwise perform default actions
-    if (event.isCancelled()) {
-      if (event.getCancelMessage() != null) {
-        sender.sendMessage(event.getCancelMessage());
-      }
-      return;
-    } else {
-      // Broadcast punishment
+    if (!event.isCancelled()) {
       broadcastPunishment(event);
-
-      // Ban the Player
       banPlayer(event, null);
-
-      // Kick the now banned player
       target.kickPlayer(
           formatPunishmentScreen(
               PunishmentType.BAN, formatPunisherName(sender, match), reason, null));
+    } else if (event.getCancelMessage() != null) {
+      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -366,29 +327,18 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-
-    // Special event called for TEMP ban
     PlayerTimedPunishmentEvent event =
         new PlayerTimedPunishmentEvent(
             sender, targetMatchPlayer, PunishmentType.TEMP_BAN, reason, silent, banLength);
     match.callEvent(event);
-
-    if (event.isCancelled()) {
-      if (event.getCancelMessage() != null) {
-        sender.sendMessage(event.getCancelMessage());
-      }
-      return;
-    } else {
-      // Broadcast punishment
+    if (!event.isCancelled()) {
       broadcastPunishment(event);
-
-      // Ban the player
       banPlayer(event, event.getExpiryDate());
-
-      // Kick the now banned player
       target.kickPlayer(
           formatPunishmentScreen(
               PunishmentType.BAN, formatPunisherName(sender, match), reason, banLength));
+    } else if (event.getCancelMessage() != null) {
+      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -427,13 +377,10 @@ public class ModerationCommands {
     }
 
     public Component getScreenComponent(Component reason) {
-      if (screen) {
-        return new PersonalizedTranslatable(SCREEN_TRANSLATE_KEY + name().toLowerCase(), reason)
-            .getPersonalizedText()
-            .color(ChatColor.GOLD);
-      } else {
-        return Components.blank();
-      }
+      if (!screen) return Components.blank();
+      return new PersonalizedTranslatable(SCREEN_TRANSLATE_KEY + name().toLowerCase(), reason)
+          .getPersonalizedText()
+          .color(ChatColor.GOLD);
     }
   }
 
@@ -441,17 +388,11 @@ public class ModerationCommands {
    * Format Punisher Name
    */
   public static Component formatPunisherName(CommandSender sender, Match match) {
-    Component name = CONSOLE_NAME;
-    if (sender instanceof Player) {
-      Player senderBukkit = (Player) sender;
-      if (senderBukkit != null) {
-        MatchPlayer senderMatchPlayer = match.getPlayer(senderBukkit);
-        if (senderMatchPlayer != null) {
-          name = senderMatchPlayer.getStyledName(NameStyle.FANCY);
-        }
-      }
+    if (sender != null && sender instanceof Player) {
+      MatchPlayer matchPlayer = match.getPlayer((Player) sender);
+      if (matchPlayer != null) return matchPlayer.getStyledName(NameStyle.FANCY);
     }
-    return name;
+    return CONSOLE_NAME;
   }
 
   /*
