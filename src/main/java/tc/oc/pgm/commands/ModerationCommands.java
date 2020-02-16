@@ -21,6 +21,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.component.Component;
+import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
@@ -205,13 +206,16 @@ public class ModerationCommands {
       warn(sender, target, match, reason, true);
     }
 
-    PlayerPunishmentEvent event =
-        punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent);
-    if (!event.isCancelled()) {
-      broadcastPunishment(event);
-      chat.addMuted(targetMatchPlayer);
-    } else if (event.getCancelMessage() != null) {
-      sender.sendMessage(event.getCancelMessage());
+    if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent)) {
+      if (chat.isMuted(targetMatchPlayer)) {
+        sender.sendMessage(
+            new PersonalizedTranslatable(
+                    "moderation.mute.existing", targetMatchPlayer.getStyledName(NameStyle.FANCY))
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+      } else {
+        chat.addMuted(targetMatchPlayer);
+      }
     }
   }
 
@@ -255,13 +259,9 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    PlayerPunishmentEvent event =
-        punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, silent);
-    if (!event.isCancelled()) {
-      broadcastPunishment(event);
+
+    if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, silent)) {
       sendWarning(targetMatchPlayer, reason);
-    } else if (event.getCancelMessage() != null) {
-      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -277,15 +277,10 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    PlayerPunishmentEvent event =
-        punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent);
-    if (!event.isCancelled()) {
-      broadcastPunishment(event);
+    if (punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent)) {
       target.kickPlayer(
           formatPunishmentScreen(
               PunishmentType.KICK, formatPunisherName(sender, match), reason, null));
-    } else if (event.getCancelMessage() != null) {
-      sender.sendMessage(event.getCancelMessage());
     }
   }
 
@@ -301,16 +296,10 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('s') boolean silent) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    PlayerPunishmentEvent event =
-        punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, silent);
-    if (!event.isCancelled()) {
-      broadcastPunishment(event);
-      banPlayer(event, null);
-      target.kickPlayer(
-          formatPunishmentScreen(
-              PunishmentType.BAN, formatPunisherName(sender, match), reason, null));
-    } else if (event.getCancelMessage() != null) {
-      sender.sendMessage(event.getCancelMessage());
+    Component senderName = formatPunisherName(sender, match);
+    if (punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, silent)) {
+      banPlayer(target, reason, senderName, null);
+      target.kickPlayer(formatPunishmentScreen(PunishmentType.BAN, senderName, reason, null));
     }
   }
 
@@ -333,7 +322,7 @@ public class ModerationCommands {
     match.callEvent(event);
     if (!event.isCancelled()) {
       broadcastPunishment(event);
-      banPlayer(event, event.getExpiryDate());
+      banPlayer(target, reason, formatPunisherName(sender, match), event.getExpiryDate());
       target.kickPlayer(
           formatPunishmentScreen(
               PunishmentType.BAN, formatPunisherName(sender, match), reason, banLength));
@@ -342,7 +331,7 @@ public class ModerationCommands {
     }
   }
 
-  private PlayerPunishmentEvent punish(
+  private boolean punish(
       PunishmentType type,
       MatchPlayer target,
       CommandSender issuer,
@@ -350,8 +339,12 @@ public class ModerationCommands {
       boolean silent) {
     PlayerPunishmentEvent event = new PlayerPunishmentEvent(issuer, target, type, reason, silent);
     target.getMatch().callEvent(event);
-
-    return event;
+    if (event.isCancelled() && event.getCancelMessage() != null) {
+      issuer.sendMessage(event.getCancelMessage());
+    } else if (!silent) {
+      broadcastPunishment(event);
+    }
+    return !event.isCancelled();
   }
 
   public static enum PunishmentType {
@@ -462,11 +455,6 @@ public class ModerationCommands {
    * Sends a formatted title and plays a sound warning a user of their actions
    */
   private void sendWarning(MatchPlayer target, String reason) {
-    showWarningTitle(target, reason);
-    target.playSound(WARN_SOUND);
-  }
-
-  private void showWarningTitle(MatchPlayer target, String reason) {
     Component titleWord =
         new PersonalizedTranslatable("moderation.warning")
             .getPersonalizedText()
@@ -475,6 +463,7 @@ public class ModerationCommands {
     Component subtitle = formatPunishmentReason(reason).color(ChatColor.GOLD);
 
     target.showTitle(title, subtitle, 5, 200, 10);
+    target.playSound(WARN_SOUND);
   }
 
   private void broadcastPunishment(PlayerPunishmentEvent event) {
@@ -525,12 +514,13 @@ public class ModerationCommands {
    * Bukkit method of banning players
    * NOTE: Will use this if not handled by other plugins
    */
-  private void banPlayer(PlayerPunishmentEvent event, @Nullable Instant expires) {
+  private void banPlayer(
+      Player target, String reason, Component source, @Nullable Instant expires) {
     Bukkit.getBanList(BanList.Type.NAME)
         .addBan(
-            event.getPlayer().getBukkit().getName(),
-            event.getReason(),
+            target.getName(),
+            reason,
             expires != null ? Date.from(expires) : null,
-            event.getSender().getName());
+            ComponentRenderers.toLegacyText(source, target));
   }
 }
