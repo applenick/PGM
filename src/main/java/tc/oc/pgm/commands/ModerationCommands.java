@@ -201,21 +201,22 @@ public class ModerationCommands {
       @Switch('w') boolean warn) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
+    if (chat.isMuted(targetMatchPlayer)) {
+      sender.sendMessage(
+          new PersonalizedTranslatable(
+                  "moderation.mute.existing", targetMatchPlayer.getStyledName(NameStyle.FANCY))
+              .getPersonalizedText()
+              .color(ChatColor.RED));
+      return;
+    }
+
     // if -w flag, also warn the player but don't broadcast warning
     if (warn) {
       warn(sender, target, match, reason, true);
     }
 
     if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent)) {
-      if (chat.isMuted(targetMatchPlayer)) {
-        sender.sendMessage(
-            new PersonalizedTranslatable(
-                    "moderation.mute.existing", targetMatchPlayer.getStyledName(NameStyle.FANCY))
-                .getPersonalizedText()
-                .color(ChatColor.RED));
-      } else {
-        chat.addMuted(targetMatchPlayer);
-      }
+      chat.addMuted(targetMatchPlayer);
     }
   }
 
@@ -339,8 +340,10 @@ public class ModerationCommands {
       boolean silent) {
     PlayerPunishmentEvent event = new PlayerPunishmentEvent(issuer, target, type, reason, silent);
     target.getMatch().callEvent(event);
-    if (event.isCancelled() && event.getCancelMessage() != null) {
-      issuer.sendMessage(event.getCancelMessage());
+    if (event.isCancelled()) {
+      if (event.getCancelMessage() != null) {
+        issuer.sendMessage(event.getCancelMessage());
+      }
     } else if (!silent) {
       broadcastPunishment(event);
     }

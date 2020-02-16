@@ -32,9 +32,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.commands.ModerationCommands.PunishmentType;
 import tc.oc.pgm.commands.SettingCommands;
-import tc.oc.pgm.events.PlayerPunishmentEvent;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.util.StringUtils;
 import tc.oc.util.components.Components;
@@ -238,20 +236,6 @@ public class ChatDispatcher implements Listener {
         sendAdmin(player.getMatch(), player, event.getMessage().substring(1));
       } else {
         sendDefault(player.getMatch(), player, event.getMessage());
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onMutePlayer(PlayerPunishmentEvent event) {
-    if (event.getType().equals(PunishmentType.MUTE)) {
-      if (isMuted(event.getPlayer())) {
-        Component errorMsg =
-            new PersonalizedTranslatable(
-                    "moderation.mute.existing", event.getPlayer().getStyledName(NameStyle.FANCY))
-                .getPersonalizedText()
-                .color(ChatColor.RED);
-        event.setCancelled(true, errorMsg);
       }
     }
   }
