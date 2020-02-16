@@ -326,7 +326,7 @@ public class ModerationCommands {
       banPlayer(target, reason, formatPunisherName(sender, match), event.getExpiryDate());
       target.kickPlayer(
           formatPunishmentScreen(
-              PunishmentType.BAN, formatPunisherName(sender, match), reason, banLength));
+              PunishmentType.TEMP_BAN, formatPunisherName(sender, match), reason, banLength));
     } else if (event.getCancelMessage() != null) {
       sender.sendMessage(event.getCancelMessage());
     }
