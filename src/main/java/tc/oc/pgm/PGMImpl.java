@@ -76,7 +76,6 @@ import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.MapPoolCommands;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.commands.ModeCommands;
-import tc.oc.pgm.commands.ModerationCommands;
 import tc.oc.pgm.commands.ObserverCommands;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.commands.StartCommands;
@@ -90,6 +89,8 @@ import tc.oc.pgm.commands.provider.MatchProvider;
 import tc.oc.pgm.commands.provider.SettingKeyProvider;
 import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
+import tc.oc.pgm.community.ModerationCommands;
+import tc.oc.pgm.community.ReportCommands;
 import tc.oc.pgm.db.DatastoreCacheImpl;
 import tc.oc.pgm.db.DatastoreImpl;
 import tc.oc.pgm.events.ConfigLoadEvent;
@@ -370,9 +371,12 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     node.registerNode("mode", "modes").registerCommands(new ModeCommands());
     node.registerCommands(new TimeLimitCommands());
     node.registerCommands(new SettingCommands());
-    node.registerCommands(new ModerationCommands(chat));
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
+
+    // TODO: Community commands
+    node.registerCommands(new ModerationCommands(chat));
+    node.registerCommands(new ReportCommands());
 
     new BukkitIntake(this, graph).register();
   }

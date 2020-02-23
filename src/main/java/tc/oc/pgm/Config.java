@@ -503,5 +503,14 @@ public class Config {
       return ChatColor.translateAlternateColorCodes(
           '&', getConfiguration().getString("moderation.server-name", ""));
     }
+
+    public static String getAppealMessage() {
+      return ChatColor.translateAlternateColorCodes(
+          '&', getConfiguration().getString("moderation.appeal-msg", ""));
+    }
+
+    public static boolean isAppealVisible() {
+      return getAppealMessage().length() > 0;
+    }
   }
 }

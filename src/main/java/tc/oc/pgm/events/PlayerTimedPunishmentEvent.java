@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.commands.ModerationCommands.PunishmentType;
+import tc.oc.pgm.community.ModerationCommands.PunishmentType;
 
 /** Called when a punishment that expires after a duration of time is created * */
 public class PlayerTimedPunishmentEvent extends PlayerPunishmentEvent {
