@@ -27,6 +27,7 @@ import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.nms.VanishStatus;
 
 @ListenerScope(MatchScope.LOADED)
 public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
@@ -95,6 +96,11 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       return GenericJoinResult.Status.MATCH_FINISHED.toResult();
     }
 
+    // Don't allow vanished players to join
+    if (VanishStatus.isVanished(joining.getBukkit())) {
+      return GenericJoinResult.Status.VANISHED.toResult();
+    }
+
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
     if (match.isRunning() && !Config.Join.midMatch()) {
@@ -132,6 +138,10 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
         case NO_PERMISSION:
           joining.sendWarning(
               new PersonalizedTranslatable("command.gameplay.join.joinDenied"), false);
+          return true;
+
+        case VANISHED:
+          joining.sendWarning(new PersonalizedTranslatable("command.gameplay.join.vanish"), false);
           return true;
       }
     }

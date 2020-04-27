@@ -27,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -51,6 +52,7 @@ import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.DeathOverride;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.VanishStatus;
 
 public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<MatchPlayer> {
 
@@ -182,6 +184,8 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
+    if (VanishStatus.isVanished(other.getBukkit()) && !getBukkit().hasPermission(Permissions.STAFF))
+      return false;
     return isObserving()
         && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
   }

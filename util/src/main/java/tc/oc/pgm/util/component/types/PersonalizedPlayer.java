@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.DeathOverride;
+import tc.oc.pgm.util.nms.VanishStatus;
 
 /**
  * A component that renders as a player's name.
@@ -76,6 +77,11 @@ public class PersonalizedPlayer extends Component {
     if (style.showDeath && DeathOverride.isDead(player)) {
       displayName =
           displayName.replaceFirst(realName, ChatColor.DARK_GRAY + realName + ChatColor.RESET);
+    }
+
+    if (style.showVanish && VanishStatus.isVanished(player)) {
+      displayName =
+          displayName.replaceFirst(realName, ChatColor.STRIKETHROUGH + realName + ChatColor.RESET);
     }
 
     component = TextComponent.fromLegacyToComponent(displayName, false);
