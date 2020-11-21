@@ -17,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.friends.FriendProvider;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -31,6 +32,13 @@ public final class PlayerComponent {
   public static Component player(UUID playerId, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
     return player != null ? player(player, style) : UNKNOWN;
+  }
+  
+  static Component player(UUID playerId, String defName, NameStyle style) {
+    Player player = Bukkit.getPlayer(playerId);
+    return player != null
+        ? player(player, style)
+        : defName != null ? player(null, defName, style, null) : UNKNOWN;
   }
 
   public static Component player(CommandSender sender, NameStyle style) {
@@ -65,6 +73,13 @@ public final class PlayerComponent {
       if (metadata != null) provider = (NameDecorationProvider) metadata.value();
     }
 
+    FriendProvider friendProvider = FriendProvider.DEFAULT;
+    if (player != null) {
+      MetadataValue friendMeta =
+          player.getMetadata(FriendProvider.METADATA_KEY, BukkitUtils.getPlugin());
+      if (friendMeta != null) friendProvider = (FriendProvider) friendMeta.value();
+    }
+
     UUID uuid = !isOffline ? player.getUniqueId() : null;
 
     TextComponent.Builder builder = text();
@@ -85,6 +100,14 @@ public final class PlayerComponent {
     if (!isOffline && style.has(NameStyle.Flag.DISGUISE) && isDisguised(player)) {
       name.decoration(TextDecoration.STRIKETHROUGH, true);
     }
+
+    if (!isOffline
+        && style.has(NameStyle.Flag.FRIEND)
+        && viewer != null
+        && friendProvider.areFriends(viewer, player)) {
+      name.decoration(TextDecoration.ITALIC, true);
+    }
+
     if (!isOffline && style.has(NameStyle.Flag.TELEPORT)) {
       name.hoverEvent(showText(translatable("misc.teleportTo", NamedTextColor.GRAY, name.build())))
           .clickEvent(runCommand("/tp " + player.getName()));
