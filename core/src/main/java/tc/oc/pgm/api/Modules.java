@@ -61,7 +61,6 @@ import tc.oc.pgm.modules.ArrowRemovalMatchModule;
 import tc.oc.pgm.modules.DiscardPotionBottlesMatchModule;
 import tc.oc.pgm.modules.DiscardPotionBottlesModule;
 import tc.oc.pgm.modules.EventFilterMatchModule;
-import tc.oc.pgm.modules.FreezeMatchModule;
 import tc.oc.pgm.modules.FriendlyFireRefundMatchModule;
 import tc.oc.pgm.modules.FriendlyFireRefundModule;
 import tc.oc.pgm.modules.InternalMatchModule;
@@ -157,7 +156,6 @@ public interface Modules {
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
-    register(FreezeMatchModule.class, FreezeMatchModule::new);
 
     // FIXME: Disabled due to lag - look into future optimization
     // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
