@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public interface BukkitUtils {
 
-  AtomicReference<Plugin> PLUGIN = new AtomicReference<>();
+  public static AtomicReference<Plugin> PLUGIN = new AtomicReference<>();
 
   @Deprecated
   static Plugin getPlugin() {
