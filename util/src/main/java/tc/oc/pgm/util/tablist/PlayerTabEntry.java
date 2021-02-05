@@ -69,7 +69,9 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-    return this.player.getSkin();
+    return view.getViewer() != null && this.player.hasFakeSkin(view.getViewer())
+        ? this.player.getFakeSkin(view.getViewer())
+        : this.player.getSkin();
   }
 
   @Override
