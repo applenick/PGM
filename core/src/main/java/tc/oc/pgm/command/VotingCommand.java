@@ -52,7 +52,7 @@ public class VotingCommand {
         translatable(
             "vote.add",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
+            UsernameFormatUtils.formatStaffName(sender, match, sender),
             map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.isAdded(map)) {
@@ -85,7 +85,7 @@ public class VotingCommand {
           translatable(
               "vote.remove",
               NamedTextColor.GRAY,
-              UsernameFormatUtils.formatStaffName(sender, match),
+              UsernameFormatUtils.formatStaffName(sender, match, sender),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
@@ -108,7 +108,7 @@ public class VotingCommand {
         translatable(
             "vote.toggle",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
+            UsernameFormatUtils.formatStaffName(sender, match, sender),
             voteModeName),
         match);
   }
@@ -129,7 +129,7 @@ public class VotingCommand {
         translatable(
             "vote.remove",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
+            UsernameFormatUtils.formatStaffName(sender, match, sender),
             TextFormatter.list(maps, NamedTextColor.GRAY));
 
     vote.clear();
