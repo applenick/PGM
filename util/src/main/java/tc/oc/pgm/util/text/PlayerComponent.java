@@ -95,7 +95,9 @@ public final class PlayerComponent {
     String nicked = player != null ? nickProvider.getPlayerName(player) : defName;
 
     TextComponent.Builder builder = text();
-    if (!isOffline && style.has(NameStyle.Flag.FLAIR) && !isNicked) {
+    if (!isOffline
+        && style.has(NameStyle.Flag.FLAIR)
+        && canViewNick(player, viewer, friendProvider)) {
       builder.append(provider.getPrefixComponent(uuid));
     }
 
@@ -141,7 +143,9 @@ public final class PlayerComponent {
 
     builder.append(name);
 
-    if (!isOffline && style.has(NameStyle.Flag.FLAIR) && !isNicked) {
+    if (!isOffline
+        && style.has(NameStyle.Flag.FLAIR)
+        && canViewNick(player, viewer, friendProvider)) {
       builder.append(provider.getSuffixComponent(uuid));
     }
     return builder.build();
