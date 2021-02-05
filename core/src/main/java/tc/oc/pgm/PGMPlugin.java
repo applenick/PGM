@@ -61,6 +61,8 @@ import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistryImpl;
+import tc.oc.pgm.nick.NickRegistry;
+import tc.oc.pgm.nick.NickRegistryImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -96,6 +98,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private VanishManager vanishManager;
   private InventoryManager inventoryManager;
   private FriendRegistry friendRegistry;
+  private NickRegistry nickRegistry;
 
   public PGMPlugin() {
     super();
@@ -194,9 +197,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       }
     }
 
+    nickRegistry = new NickRegistryImpl(null, logger); // TODO add config value
+
     nameDecorationRegistry =
         new NameDecorationRegistryImpl(
-            config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
+            config.getGroups().isEmpty() ? null : new ConfigDecorationProvider(), nickRegistry);
 
     friendRegistry = new FriendRegistryImpl(null);
 
@@ -214,7 +219,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     vanishManager =
         config.isVanishEnabled()
-            ? new VanishManagerImpl(matchManager, executorService)
+            ? new VanishManagerImpl(matchManager, executorService, nickRegistry)
             : new NoopVanishManager();
 
     inventoryManager = new InventoryManager(this);
@@ -341,6 +346,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return friendRegistry;
   }
 
+  @Override
+  public NickRegistry getNickRegistry() {
+    return nickRegistry;
+  }
+
   private void registerCommands() {
     final CommandGraph graph = new CommandGraph();
 
@@ -367,6 +377,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(matchManager);
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(vanishManager);
+    registerEvents(nickRegistry);
     registerEvents(nameDecorationRegistry);
     registerEvents(friendRegistry);
     registerEvents(new PGMListener(this, matchManager, vanishManager));
