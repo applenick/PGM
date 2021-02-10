@@ -101,9 +101,6 @@ public final class PGMConfig implements Config {
   private final Component rightTablistText;
   private final Component leftTablistText;
 
-  // vanish.*
-  private final boolean vanishEnabled;
-
   // groups.*
   private final List<Group> groups;
 
@@ -192,7 +189,6 @@ public final class PGMConfig implements Config {
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
     this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
-    this.vanishEnabled = parseBoolean(config.getString("vanish.enabled", "true"));
 
     this.verboseStats = parseBoolean(config.getString("stats.verbose", "true"));
     this.statsShowAfter = parseDuration(config.getString("stats.show-after", "6s"));
@@ -624,11 +620,6 @@ public final class PGMConfig implements Config {
     return verboseItemSlot;
   }
   
-  @Override
-  public boolean isVanishEnabled() {
-    return vanishEnabled;
-  }
-
   @Override
   public String getMotd() {
     return motd;
