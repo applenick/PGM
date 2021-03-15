@@ -12,7 +12,6 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.VanishManager;
-import tc.oc.pgm.friends.FriendRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.nick.NickRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
@@ -44,8 +43,6 @@ public interface PGM extends Plugin {
   VanishManager getVanishManager();
 
   InventoryManager getInventoryManager();
-
-  FriendRegistry getFriendRegistry();
 
   NickRegistry getNickRegistry();
 
