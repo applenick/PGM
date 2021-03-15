@@ -45,6 +45,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
+import tc.oc.pgm.integration.FriendIntegration;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.util.Audience;
@@ -202,7 +203,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return isObserving()
         && (getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON
             || getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_FRIEND
-                && PGM.get().getFriendRegistry().areFriends(getId(), other.getId()));
+                && FriendIntegration.isFriend(getBukkit(), other.getBukkit()));
   }
 
   @Override
