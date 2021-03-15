@@ -45,8 +45,6 @@ import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
-import tc.oc.pgm.friends.FriendRegistry;
-import tc.oc.pgm.friends.FriendRegistryImpl;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -95,8 +93,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
+<<<<<<< HEAD
   private InventoryManager inventoryManager;
   private FriendRegistry friendRegistry;
+=======
+>>>>>>> 63567c95 (Introduce integrations)
   private NickRegistry nickRegistry;
 
   public PGMPlugin() {
@@ -201,8 +202,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     nameDecorationRegistry =
         new NameDecorationRegistryImpl(
             config.getGroups().isEmpty() ? null : new ConfigDecorationProvider(), nickRegistry);
-
-    friendRegistry = new FriendRegistryImpl(null);
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
     final File[] worldDirs = getServer().getWorldContainer().listFiles();
@@ -332,17 +331,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return vanishManager;
   }
 
-  @Override
   public InventoryManager getInventoryManager() {
     return inventoryManager;
   }
 
-  @Override
-  public FriendRegistry getFriendRegistry() {
-    return friendRegistry;
-  }
-
-  @Override
   public NickRegistry getNickRegistry() {
     return nickRegistry;
   }
@@ -375,7 +367,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(vanishManager);
     registerEvents(nickRegistry);
     registerEvents(nameDecorationRegistry);
-    registerEvents(friendRegistry);
     registerEvents(new PGMListener(this, matchManager, vanishManager));
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
