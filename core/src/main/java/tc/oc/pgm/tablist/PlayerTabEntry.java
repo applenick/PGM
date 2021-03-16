@@ -1,6 +1,6 @@
-package tc.oc.pgm.util.tablist;
+package tc.oc.pgm.tablist;
 
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -10,6 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.tablist.DynamicTabEntry;
+import tc.oc.pgm.util.tablist.SimpleTabEntry;
+import tc.oc.pgm.util.tablist.TabEntry;
+import tc.oc.pgm.util.tablist.TabView;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /**
