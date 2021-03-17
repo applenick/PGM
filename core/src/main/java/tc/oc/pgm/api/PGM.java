@@ -11,9 +11,7 @@ import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
-import tc.oc.pgm.nick.NickRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
@@ -40,11 +38,7 @@ public interface PGM extends Plugin {
 
   ScheduledExecutorService getAsyncExecutor();
 
-  VanishManager getVanishManager();
-
   InventoryManager getInventoryManager();
-
-  NickRegistry getNickRegistry();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 
