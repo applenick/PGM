@@ -3,6 +3,7 @@ package tc.oc.pgm.api.player;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.GameMode;
+import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
@@ -253,4 +254,11 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
 
   @Deprecated
   void internalSetParty(Party party);
+
+  /**
+   * Change the skin of the {@link MatchPlayer}.
+   *
+   * @param skin The skin to apply to the {@link MatchPlayer}.
+   */
+  void setSkin(Skin skin);
 }

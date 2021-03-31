@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.FriendStatusChangeEvent;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
+import tc.oc.pgm.api.event.PlayerSkinChangeEvent;
 import tc.oc.pgm.api.event.PlayerVanishEvent;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
@@ -314,5 +315,10 @@ public class MatchTabManager extends TabManager implements Listener {
     if (entry instanceof PlayerTabEntry) {
       ((PlayerTabEntry) entry).onSkinPartsChange(event);
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSkinChange(PlayerSkinChangeEvent event) {
+    this.getPlayerEntry(event.getPlayer()).refresh();
   }
 }

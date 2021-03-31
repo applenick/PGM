@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.*;
 import net.minecraft.server.v1_8_R3.WorldBorder;
+import net.minecraft.server.v1_8_R3.WorldType;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -58,6 +59,28 @@ public interface NMSHacks {
     for (EntityPlayer viewer : ((Set<EntityPlayer>) entry.trackedPlayers)) {
       viewer.playerConnection.sendPacket((Packet) packet);
     }
+  }
+
+  static void forceSkinChange(Player player) {
+    PacketPlayOutRespawn respawnPacket =
+        new PacketPlayOutRespawn(
+            player.getWorld().getEnvironment().getId(),
+            EnumDifficulty.NORMAL,
+            WorldType.FLAT,
+            WorldSettings.EnumGamemode.getById(player.getGameMode().getValue()));
+    sendPacket(player, respawnPacket);
+
+    Location location = player.getLocation().clone();
+    Set<PacketPlayOutPosition.EnumPlayerTeleportFlags> set = new HashSet<>();
+    PacketPlayOutPosition packetPlayOutPosition =
+        new PacketPlayOutPosition(
+            location.getX(),
+            location.getY(),
+            location.getZ(),
+            location.getYaw(),
+            location.getPitch(),
+            set);
+    sendPacket(player, packetPlayOutPosition);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(

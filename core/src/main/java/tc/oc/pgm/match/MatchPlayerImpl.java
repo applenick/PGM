@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
+import org.bukkit.Skin;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -32,6 +33,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.PlayerSkinChangeEvent;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
@@ -386,6 +388,13 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     if (party.compareAndSet(getParty(), newParty)) {
       query.set(new tc.oc.pgm.filters.query.PlayerQuery(null, this));
     }
+  }
+
+  @Override
+  public void setSkin(Skin skin) {
+    this.getBukkit().setSkin(skin);
+    getMatch().callEvent(new PlayerSkinChangeEvent(this, skin));
+    NMSHacks.forceSkinChange(this.getBukkit());
   }
 
   @Override
