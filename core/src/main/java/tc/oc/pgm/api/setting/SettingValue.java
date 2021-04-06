@@ -33,6 +33,7 @@ public enum SettingValue {
 
   MESSAGE_ON("message", "on", DyeColor.GREEN), // Always accept direct messages
   MESSAGE_OFF("message", "off", DyeColor.RED), // Never accept direct messages
+  MESSAGE_FRIEND("message", "friend", DyeColor.YELLOW), // Only accept friend direct messages
 
   OBSERVERS_ON("observers", "on", DyeColor.GREEN), // Show observers
   OBSERVERS_OFF("observers", "off", DyeColor.RED), // Hide observers
