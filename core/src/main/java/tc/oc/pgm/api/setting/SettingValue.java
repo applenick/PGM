@@ -33,7 +33,6 @@ public enum SettingValue {
 
   MESSAGE_ON("message", "all", DyeColor.GREEN), // Always accept direct messages
   MESSAGE_OFF("message", "none", DyeColor.RED), // Never accept direct messages
-  MESSAGE_FRIEND("message", "friends", DyeColor.YELLOW), // Only accept friend direct messages
 
   OBSERVERS_ON("observers", "all", DyeColor.GREEN), // Show observers
   OBSERVERS_OFF("observers", "none", DyeColor.RED), // Hide observers
@@ -51,6 +50,8 @@ public enum SettingValue {
 
   EFFECTS_ON("effects", "on", DyeColor.GREEN), // Display special particle effects
   EFFECTS_OFF("effects", "off", DyeColor.RED), // Don't display special particle effects
+  
+  MESSAGE_FRIEND("message", "friends", DyeColor.YELLOW), // Only accept friend direct messages
 
   TIME_AUTO("time", "auto", DyeColor.ORANGE), // Player time is in sync
   TIME_DARK("time", "dark", DyeColor.GRAY), // Player time is always set to midday
