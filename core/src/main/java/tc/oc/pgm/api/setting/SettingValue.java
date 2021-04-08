@@ -31,12 +31,12 @@ public enum SettingValue {
   JOIN_OFF("join", "none", DyeColor.RED), // Never send join messages
   JOIN_FRIENDS("join", "friends", DyeColor.GREEN), // Only send friend join messages
 
-  MESSAGE_ON("message", "on", DyeColor.GREEN), // Always accept direct messages
-  MESSAGE_OFF("message", "off", DyeColor.RED), // Never accept direct messages
-  MESSAGE_FRIEND("message", "friend", DyeColor.YELLOW), // Only accept friend direct messages
+  MESSAGE_ON("message", "all", DyeColor.GREEN), // Always accept direct messages
+  MESSAGE_OFF("message", "none", DyeColor.RED), // Never accept direct messages
+  MESSAGE_FRIEND("message", "friends", DyeColor.YELLOW), // Only accept friend direct messages
 
-  OBSERVERS_ON("observers", "on", DyeColor.GREEN), // Show observers
-  OBSERVERS_OFF("observers", "off", DyeColor.RED), // Hide observers
+  OBSERVERS_ON("observers", "all", DyeColor.GREEN), // Show observers
+  OBSERVERS_OFF("observers", "none", DyeColor.RED), // Hide observers
   OBSERVERS_FRIEND("observers", "friends", DyeColor.YELLOW), // Only show friend observers
 
   SOUNDS_ALL("sounds", "all", DyeColor.GREEN), // Play all sounds
