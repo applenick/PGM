@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -14,6 +17,7 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
+import tc.oc.pgm.rotation.vote.VotePoolOptions;
 
 public class VotingPool extends MapPool {
 
@@ -31,6 +35,14 @@ public class VotingPool extends MapPool {
   private MapPoll currentPoll;
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
+    this(manager, section, name, null);
+  }
+
+  public VotingPool(
+      MapPoolManager manager,
+      ConfigurationSection section,
+      String name,
+      @Nullable VotePoolOptions existingOptions) {
     super(manager, section, name);
 
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
