@@ -5,8 +5,8 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.rotation.MapPoolManager;
 
 public class DisabledMapPool extends MapPool {
-  DisabledMapPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    super(manager, section, name);
+  DisabledMapPool(MapPoolManager manager, ConfigurationSection section, String id) {
+    super(manager, section, id);
   }
 
   @Override
