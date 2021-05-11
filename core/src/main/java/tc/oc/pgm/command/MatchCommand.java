@@ -22,6 +22,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.party.Competitor;
@@ -83,7 +84,9 @@ public final class MatchCommand {
                 text(": ", NamedTextColor.GRAY)
                     .append(
                         text(
-                            team.getPlayers().stream().filter(mp -> !mp.isVanished()).count(),
+                            team.getPlayers().stream()
+                                .filter(mp -> !Integration.isVanished(mp.getBukkit()))
+                                .count(),
                             NamedTextColor.WHITE)));
 
         if (team.getMaxPlayers() != Integer.MAX_VALUE) {
@@ -112,7 +115,9 @@ public final class MatchCommand {
             .append(text(": ", NamedTextColor.GRAY))
             .append(
                 text(
-                    match.getObservers().stream().filter(mp -> !mp.isVanished()).count(),
+                    match.getObservers().stream()
+                        .filter(mp -> !Integration.isVanished(mp.getBukkit()))
+                        .count(),
                     NamedTextColor.WHITE))
             .build());
 
