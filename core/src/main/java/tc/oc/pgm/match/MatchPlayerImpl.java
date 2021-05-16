@@ -206,6 +206,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
         spectatorTarget != null && spectatorTarget.getId().equals(other.getId());
     if (!other.isVisible() && !isSpectatorTarget) return false;
     if (other.isParticipating()) return true;
+    if (Integration.isHidden(other.getBukkit())) return false;
     if (Integration.isVanished(other.getBukkit()) && !getBukkit().hasPermission(Permissions.VANISH))
       return false;
     return isObserving()
