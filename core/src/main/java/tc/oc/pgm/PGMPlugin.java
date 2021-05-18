@@ -41,7 +41,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
 import tc.oc.pgm.db.CacheDatastore;
@@ -64,6 +63,7 @@ import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistryImpl;
+import tc.oc.pgm.names.NameComponentProviderImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -229,7 +229,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     // Set name provider
-    PlayerComponentProvider.PROVIDER.set(new PlayerComponent.NameComponentProviderImpl());
+    PlayerComponentProvider.PROVIDER.set(new NameComponentProviderImpl());
 
     registerListeners();
     registerCommands();
