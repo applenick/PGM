@@ -1,6 +1,7 @@
 package tc.oc.pgm.rotation.pools;
 
 import java.util.Collection;
+import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -119,7 +120,11 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
 
               currentPoll =
-                  new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+                      new MapPoll(
+                          match,
+                          mapPicker.getMaps(manager.getVoteOptions(), mapScores),
+                          manager.getVoteOptions());
+
             },
             5,
             TimeUnit.SECONDS);

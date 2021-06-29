@@ -22,6 +22,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.VotingPool;
@@ -42,7 +43,7 @@ public class VotingCommand {
       perms = Permissions.SETNEXT)
   public void addMap(
       Audience viewer,
-      CommandSender sender,
+      MatchPlayer sender,
       @Fallback(Type.NULL) @Text MapInfo map,
       MapOrder mapOrder,
       Match match)
@@ -53,7 +54,7 @@ public class VotingCommand {
         translatable(
             "vote.add",
             NamedTextColor.GRAY,
-            player(sender, NameStyle.FANCY),
+            player(sender.getBukkit(), NameStyle.FANCY),
             map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.isAdded(map)) {
