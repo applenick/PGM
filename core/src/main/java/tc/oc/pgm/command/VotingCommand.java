@@ -62,7 +62,7 @@ public class VotingCommand {
       return;
     }
 
-    if (vote.addVote(map)) {
+    if (vote.addVote(map, sender.getId(), false)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
