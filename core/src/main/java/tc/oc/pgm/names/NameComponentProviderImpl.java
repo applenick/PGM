@@ -42,7 +42,9 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
     }
 
     boolean canViewRealName =
-        viewer.hasPermission(Permissions.STAFF) || Integration.isFriend(player, viewer);
+        viewer == player
+            || Integration.isFriend(player, viewer)
+            || viewer.hasPermission(Permissions.STAFF);
     return canViewRealName ? player.getName() : username;
   }
 
@@ -152,8 +154,9 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
 
   static boolean canViewNick(Player player, @Nullable Player viewer) {
     if (viewer == null) return false;
-    if (viewer == player) return true;
     if (player.hasPermission(Permissions.ADMIN)) return viewer.hasPermission(Permissions.ADMIN);
-    return viewer.hasPermission(Permissions.STAFF) || Integration.isFriend(player, viewer);
+    return viewer == player
+        || viewer.hasPermission(Permissions.STAFF)
+        || Integration.isFriend(player, viewer);
   }
 }
