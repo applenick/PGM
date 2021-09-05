@@ -47,7 +47,12 @@ public enum SettingKey {
       MESSAGE_ON,
       MESSAGE_OFF,
       MESSAGE_FRIEND), // Changes if direct messages are accepted
-  OBSERVERS(Arrays.asList("observers", "obs"), Material.EYE_OF_ENDER, OBSERVERS_ON, OBSERVERS_OFF, OBSERVERS_FRIEND) {
+  OBSERVERS(
+      Arrays.asList("observers", "obs"),
+      Material.EYE_OF_ENDER,
+      OBSERVERS_ON,
+      OBSERVERS_OFF,
+      OBSERVERS_FRIEND) {
     @Override
     public void update(MatchPlayer player) {
       player.resetVisibility();
