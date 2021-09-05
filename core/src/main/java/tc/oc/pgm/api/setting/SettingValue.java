@@ -21,7 +21,8 @@ public enum SettingValue {
 
   DEATH_OWN("death", "own", DyeColor.RED), // Only send death messages involving self
   DEATH_ALL("death", "all", DyeColor.ORANGE), // Send all death messages, highlight your own
-  DEATH_FRIENDS("death", "friends", DyeColor.GREEN), // Only send death messages involving yourself or friends
+  DEATH_FRIENDS(
+      "death", "friends", DyeColor.GREEN), // Only send death messages involving yourself or friends
 
   PICKER_AUTO("picker", "auto", DyeColor.ORANGE), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on", DyeColor.GREEN), // Display the picker GUI always
@@ -50,7 +51,7 @@ public enum SettingValue {
 
   EFFECTS_ON("effects", "on", DyeColor.GREEN), // Display special particle effects
   EFFECTS_OFF("effects", "off", DyeColor.RED), // Don't display special particle effects
-  
+
   MESSAGE_FRIEND("message", "friends", DyeColor.YELLOW), // Only accept friend direct messages
 
   TIME_AUTO("time", "auto", DyeColor.ORANGE), // Player time is in sync
