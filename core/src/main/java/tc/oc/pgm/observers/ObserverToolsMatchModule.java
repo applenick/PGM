@@ -56,7 +56,7 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     if (player != null) {
       ItemStack item = event.getPlayer().getBukkit().getItemInHand();
       if (item != null && item.getType().equals(TOOL_MATERIAL) && canUse(player)) {
-          openMenu(player);
+        openMenu(player);
       }
     }
   }
