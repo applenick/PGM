@@ -208,14 +208,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     matchManager = new MatchManagerImpl(logger);
 
-<<<<<<< HEAD
-    vanishManager = new VanishManagerImpl();
-
     inventoryManager = new InventoryManager(this);
     inventoryManager.init();
 
-=======
->>>>>>> 58828c3a (Add vanish & nick integrations)
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
     }
