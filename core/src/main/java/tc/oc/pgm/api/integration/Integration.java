@@ -1,6 +1,7 @@
 package tc.oc.pgm.api.integration;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
@@ -11,7 +12,9 @@ import tc.oc.pgm.integration.FriendIntegrationImpl;
 import tc.oc.pgm.integration.NickIntegrationImpl;
 import tc.oc.pgm.integration.PunishmentIntegrationImpl;
 import tc.oc.pgm.integration.RequestIntegrationImpl;
+import tc.oc.pgm.integration.TranslationIntegrationImpl;
 import tc.oc.pgm.integration.VanishIntegrationImpl;
+import tc.oc.pgm.util.translation.Translation;
 
 public interface Integration {
 
@@ -25,6 +28,8 @@ public interface Integration {
       new AtomicReference<PunishmentIntegration>(new PunishmentIntegrationImpl());
   static final AtomicReference<RequestIntegration> REQUESTS =
       new AtomicReference<RequestIntegration>(new RequestIntegrationImpl());
+  static final AtomicReference<TranslationIntegration> TRANSLATIONS =
+      new AtomicReference<TranslationIntegration>(new TranslationIntegrationImpl());
 
   public static void setFriendIntegration(FriendIntegration integration) {
     FRIENDS.set(integration);
@@ -44,6 +49,10 @@ public interface Integration {
 
   public static void setRequestIntegration(RequestIntegration integration) {
     REQUESTS.set(integration);
+  }
+
+  public static void setTranslationIntegration(TranslationIntegration integration) {
+    TRANSLATIONS.set(integration);
   }
 
   // FRIENDS
@@ -87,5 +96,10 @@ public interface Integration {
 
   public static boolean isSponsor(MapInfo map) {
     return REQUESTS.get().isSponsor(map);
+  }
+
+  // TRANSLATIONS
+  public static CompletableFuture<Translation> translate(Player sender, String message) {
+    return TRANSLATIONS.get().translate(sender, message);
   }
 }
