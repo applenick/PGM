@@ -3,6 +3,7 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.identity.Identity.identity;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -14,7 +15,9 @@ import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -50,6 +53,7 @@ import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.translation.Translation;
 
 public class ChatDispatcher implements Listener {
 
@@ -109,7 +113,8 @@ public class ChatDispatcher implements Listener {
         null,
         viewer -> true,
         SettingValue.CHAT_GLOBAL,
-        Channel.GLOBAL);
+        Channel.GLOBAL,
+        false);
   }
 
   @Command(
@@ -141,7 +146,8 @@ public class ChatDispatcher implements Listener {
                 || (viewer.isObserving()
                     && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
         SettingValue.CHAT_TEAM,
-        Channel.TEAM);
+        Channel.TEAM,
+        false);
   }
 
   @Command(
@@ -166,7 +172,8 @@ public class ChatDispatcher implements Listener {
         ADMIN_CHAT_PREFIX,
         AC_FILTER,
         SettingValue.CHAT_ADMIN,
-        Channel.ADMIN);
+        Channel.ADMIN,
+        true);
 
     // Play sounds for admin chat
     if (message != null) {
@@ -262,7 +269,8 @@ public class ChatDispatcher implements Listener {
             .build(),
         viewer -> viewer.getBukkit().equals(receiver),
         null,
-        Channel.PRIVATE);
+        Channel.PRIVATE,
+        false);
 
     // Send message to the sender
     send(
@@ -276,7 +284,8 @@ public class ChatDispatcher implements Listener {
             .build(),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null,
-        Channel.PRIVATE);
+        Channel.PRIVATE,
+        true);
   }
 
   private String formatPrivateMessage(String key, CommandSender viewer) {
@@ -371,7 +380,8 @@ public class ChatDispatcher implements Listener {
       @Nullable Component prefix,
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type,
-      Channel channel) {
+      Channel channel,
+      boolean skipTranslation) {
     // When a message is empty, this indicates the player wants to change their default chat channel
     if ((text == null || text.isEmpty()) && sender != null) {
       // FIXME: there should be a better way to do this
@@ -412,14 +422,52 @@ public class ChatDispatcher implements Listener {
                   return;
                 }
 
+                // Non-translated players & sender receive message instantly
+                Set<Player> nonTranslatedPlayers =
+                    event.getRecipients().stream()
+                        .map(manager::getPlayer)
+                        .filter(
+                            mp ->
+                                mp.equals(sender)
+                                    || mp.getSettings().getValue(SettingKey.TRANSLATE)
+                                        == SettingValue.TRANSLATE_OFF
+                                    || skipTranslation)
+                        .map(MatchPlayer::getBukkit)
+                        .collect(Collectors.toSet());
+
+                nonTranslatedPlayers.forEach(
+                    player -> {
+                      Audience audience = Audience.get(player);
+                      audience.sendMessage(
+                          identity(sender.getId()),
+                          getChatFormat(
+                              prefix,
+                              player(sender.getBukkit(), NameStyle.VERBOSE),
+                              message,
+                              message,
+                              false));
+                    });
+
+                // Perform translation
+                Translation translated = Integration.translate(sender.getBukkit(), message).join();
+
+                // Send translated text to everyone else
                 event.getRecipients().stream()
+                    .filter(player -> !nonTranslatedPlayers.contains(player))
                     .forEach(
                         player -> {
                           Audience audience = Audience.get(player);
+                          Locale locale = TextTranslations.getNearestLocale(player.getLocale());
+                          String translatedMessage = translated.getMessage(locale.getLanguage());
+
                           audience.sendMessage(
                               identity(sender.getId()),
                               getChatFormat(
-                                  prefix, player(sender.getBukkit(), NameStyle.VERBOSE), message));
+                                  prefix,
+                                  player(sender.getBukkit(), NameStyle.VERBOSE),
+                                  translatedMessage,
+                                  message,
+                                  !translatedMessage.equalsIgnoreCase(message)));
                         });
               });
       return;
@@ -470,8 +518,25 @@ public class ChatDispatcher implements Listener {
     return viewer.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL);
   }
 
-  private Component getChatFormat(@Nullable Component prefix, Component name, String message) {
-    Component msg = text(message != null ? message : "");
+  private Component getChatFormat(
+      @Nullable Component prefix,
+      Component name,
+      String message,
+      String original,
+      boolean translate) {
+    TextComponent.Builder text = text().append(text(message != null ? message : ""));
+
+    if (translate) {
+      text.hoverEvent(getOriginalMessageHover(original));
+    }
+
+    TextComponent.Builder msg = text().append(text.build());
+    if (translate) {
+      msg.append(
+          text(" (translated)", NamedTextColor.GRAY, TextDecoration.ITALIC)
+              .hoverEvent(getTranslationInfoHover()));
+    }
+
     if (prefix == null)
       return text()
           .append(text("<", NamedTextColor.WHITE))
@@ -484,6 +549,26 @@ public class ChatDispatcher implements Listener {
         .append(name)
         .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
+        .build();
+  }
+
+  private Component getOriginalMessageHover(String original) {
+    return text()
+        .append(text("Original: ", NamedTextColor.YELLOW, TextDecoration.BOLD))
+        .append(text(original, NamedTextColor.WHITE, TextDecoration.ITALIC))
+        .build();
+  }
+
+  private Component getTranslationInfoHover() {
+    return text()
+        .color(NamedTextColor.GRAY)
+        .append(text("This message was translated to your local language."))
+        .append(newline())
+        .append(text("Hover over message to view original wording."))
+        .append(newline())
+        .append(newline())
+        .append(text("Want to opt-out of auto translations? Use ", NamedTextColor.GRAY))
+        .append(text("/toggle translate", NamedTextColor.AQUA))
         .build();
   }
 

@@ -56,7 +56,10 @@ public enum SettingValue {
 
   TIME_AUTO("time", "auto", DyeColor.ORANGE), // Player time is in sync
   TIME_DARK("time", "dark", DyeColor.GRAY), // Player time is always set to midday
-  TIME_LIGHT("time", "light", DyeColor.WHITE); // Player time is always set to midnight
+  TIME_LIGHT("time", "light", DyeColor.WHITE), // Player time is always set to midnight
+
+  TRANSLATE_ON("translate", "on", DyeColor.GREEN), // Player receives translated chat messages
+  TRANSLATE_OFF("translate", "off", DyeColor.RED); // Player receives default chat
 
   private final String key;
   private final String name;
