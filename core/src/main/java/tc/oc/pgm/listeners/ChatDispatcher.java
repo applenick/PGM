@@ -259,7 +259,7 @@ public class ChatDispatcher implements Listener {
             .build(),
         viewer -> viewer.getBukkit().equals(receiver),
         null,
-        Channel.PRIVATE,
+        Channel.PRIVATE_RECEIVER,
         false);
 
     // Send message to the sender
@@ -274,7 +274,7 @@ public class ChatDispatcher implements Listener {
             .build(),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null,
-        Channel.PRIVATE,
+        Channel.PRIVATE_SENDER,
         true);
   }
 
@@ -430,10 +430,8 @@ public class ChatDispatcher implements Listener {
                 nonTranslatedPlayers.forEach(
                     player -> {
                       if (!player.equals(sender)) {
-                        if (channel == Channel.PRIVATE) {
-                          playSound(player, DM_SOUND);
-                        } else if (channel == Channel.ADMIN) {
-                          playSound(player, AC_SOUND);
+                        if (channel.getSound() != null) {
+                          playSound(player, channel.getSound());
                         }
                       }
 
@@ -457,10 +455,8 @@ public class ChatDispatcher implements Listener {
                     .forEach(
                         player -> {
                           if (!player.equals(sender)) {
-                            if (channel == Channel.PRIVATE) {
-                              playSound(player, DM_SOUND);
-                            } else if (channel == Channel.ADMIN) {
-                              playSound(player, AC_SOUND);
+                            if (channel.getSound() != null) {
+                              playSound(player, channel.getSound());
                             }
                           }
 
@@ -582,9 +578,20 @@ public class ChatDispatcher implements Listener {
   }
 
   public static enum Channel {
-    GLOBAL,
-    TEAM,
-    PRIVATE,
-    ADMIN;
+    GLOBAL(null),
+    TEAM(null),
+    PRIVATE_SENDER(null),
+    PRIVATE_RECEIVER(DM_SOUND),
+    ADMIN(AC_SOUND);
+
+    private @Nullable Sound sound;
+
+    Channel(@Nullable Sound sound) {
+      this.sound = sound;
+    }
+
+    public Sound getSound() {
+      return sound;
+    }
   }
 }
