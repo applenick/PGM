@@ -174,14 +174,6 @@ public class ChatDispatcher implements Listener {
         SettingValue.CHAT_ADMIN,
         Channel.ADMIN,
         true);
-
-    // Play sounds for admin chat
-    if (message != null) {
-      match.getPlayers().stream()
-          .filter(AC_FILTER) // Initial filter
-          .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
-          .forEach(pl -> playSound(pl, AC_SOUND));
-    }
   }
 
   @Command(
@@ -249,8 +241,6 @@ public class ChatDispatcher implements Listener {
         sender.sendWarning(muted);
         return; // Only staff can message muted players
       }
-
-      playSound(matchReceiver, DM_SOUND);
     }
 
     if (sender != null) {
@@ -421,23 +411,33 @@ public class ChatDispatcher implements Listener {
                 if (event.isCancelled()) {
                   return;
                 }
-
-                // Non-translated players & sender receive message instantly
-                Set<Player> nonTranslatedPlayers =
+                Set<MatchPlayer> matchRecipients =
                     event.getRecipients().stream()
                         .map(manager::getPlayer)
+                        .collect(Collectors.toSet());
+
+                // Non-translated players & sender receive message instantly
+                Set<MatchPlayer> nonTranslatedPlayers =
+                    matchRecipients.stream()
                         .filter(
                             mp ->
                                 mp.equals(sender)
                                     || mp.getSettings().getValue(SettingKey.TRANSLATE)
                                         == SettingValue.TRANSLATE_OFF
                                     || skipTranslation)
-                        .map(MatchPlayer::getBukkit)
                         .collect(Collectors.toSet());
 
                 nonTranslatedPlayers.forEach(
                     player -> {
-                      Audience audience = Audience.get(player);
+                      if (!player.equals(sender)) {
+                        if (channel == Channel.PRIVATE) {
+                          playSound(player, DM_SOUND);
+                        } else if (channel == Channel.ADMIN) {
+                          playSound(player, AC_SOUND);
+                        }
+                      }
+
+                      Audience audience = Audience.get(player.getBukkit());
                       audience.sendMessage(
                           identity(sender.getId()),
                           getChatFormat(
@@ -452,12 +452,21 @@ public class ChatDispatcher implements Listener {
                 Translation translated = Integration.translate(sender.getBukkit(), message).join();
 
                 // Send translated text to everyone else
-                event.getRecipients().stream()
+                matchRecipients.stream()
                     .filter(player -> !nonTranslatedPlayers.contains(player))
                     .forEach(
                         player -> {
-                          Audience audience = Audience.get(player);
-                          Locale locale = TextTranslations.getNearestLocale(player.getLocale());
+                          if (!player.equals(sender)) {
+                            if (channel == Channel.PRIVATE) {
+                              playSound(player, DM_SOUND);
+                            } else if (channel == Channel.ADMIN) {
+                              playSound(player, AC_SOUND);
+                            }
+                          }
+
+                          Audience audience = Audience.get(player.getBukkit());
+                          Locale locale =
+                              TextTranslations.getNearestLocale(player.getBukkit().getLocale());
                           String translatedMessage = translated.getMessage(locale.getLanguage());
 
                           audience.sendMessage(
