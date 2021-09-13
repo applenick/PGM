@@ -80,8 +80,12 @@ public enum SettingKey {
     public void update(MatchPlayer player) {
       PlayerTimeMatchModule.updatePlayerTime(player);
     }
-  }; // Changes player preference for time of day
-  ;
+  }, // Changes player preference for time of day
+  TRANSLATE(
+      "translate",
+      Material.HOPPER,
+      TRANSLATE_ON,
+      TRANSLATE_OFF); // Changes whether chat is auto-translated or not
 
   private final List<String> aliases;
   private final SettingValue[] values;
