@@ -9,6 +9,6 @@ public class TranslationIntegrationImpl implements TranslationIntegration {
 
   @Override
   public CompletableFuture<Translation> translate(Player sender, String message) {
-    return CompletableFuture.completedFuture(new Translation(sender, message));
+    return CompletableFuture.completedFuture(new Translation(message));
   }
 }

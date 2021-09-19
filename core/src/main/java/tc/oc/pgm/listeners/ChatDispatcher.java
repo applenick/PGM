@@ -15,7 +15,6 @@ import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -461,10 +460,7 @@ public class ChatDispatcher implements Listener {
                           }
 
                           Audience audience = Audience.get(player.getBukkit());
-                          Locale locale =
-                              TextTranslations.getNearestLocale(player.getBukkit().getLocale());
-                          String translatedMessage = translated.getMessage(locale.getLanguage());
-
+                          String translatedMessage = translated.getMessage(player.getBukkit());
                           audience.sendMessage(
                               identity(sender.getId()),
                               getChatFormat(
