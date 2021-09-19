@@ -119,9 +119,9 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <!-- 4.0.1 is just for local build ;) -->
-            <!-- Waiting on https://github.com/KyoriPowered/adventure-platform/pull/48 -->
-            <version>4.0.1-SNAPSHOT</version>
+            <!-- 4.0.1-OCC-SNAPSHOT is just for local builds ;) -->
+            <!-- Per-User rendering was implemented, we'll update this asap -->
+            <version>4.0.1-OCC-SNAPSHOT</version>
             <scope>compile</scope>
             <!-- Exclude Spigot APIs since we already provide Bukkit -->
             <exclusions>
