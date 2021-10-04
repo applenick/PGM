@@ -35,7 +35,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.util.Audience;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
