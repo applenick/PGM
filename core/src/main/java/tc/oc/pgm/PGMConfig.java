@@ -619,7 +619,7 @@ public final class PGMConfig implements Config {
   public int getVerboseItemSlot() {
     return verboseItemSlot;
   }
-  
+
   @Override
   public String getMotd() {
     return motd;
