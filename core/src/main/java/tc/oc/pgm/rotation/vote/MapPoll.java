@@ -47,6 +47,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.events.MapVoteWinnerEvent;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
@@ -281,7 +282,13 @@ public class MapPoll {
     running = false;
     MapInfo picked = getMostVotedMap();
     Match match = this.match.get();
-    if (match != null) match.getPlayers().forEach(player -> announceWinner(player, picked));
+    
+    if (match != null) 
+      match.getPlayers().forEach(player -> announceWinner(player, picked));
+
+    if (picked != null)
+      match.callEvent(new MapVoteWinnerEvent(picked));
+    
     return picked;
   }
 
