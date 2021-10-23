@@ -58,11 +58,13 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     // that the other one does't have is first. Disguised players effectively have no perms.
     for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
       Permission permission = group.getPermission();
-      boolean aPerm = aNick == null && a.hasPermission(permission);
-      boolean bPerm = bNick == null && b.hasPermission(permission);
+      if (!group.getId().equalsIgnoreCase("default")) {
+        boolean aPerm = aNick == null && a.hasPermission(permission);
+        boolean bPerm = bNick == null && b.hasPermission(permission);
 
-      if (aPerm && !bPerm) return -1;
-      else if (bPerm && !aPerm) return 1;
+        if (aPerm && !bPerm) return -1;
+        else if (bPerm && !aPerm) return 1;
+      }
     }
     if (aNick == null) aNick = a.getName();
     if (bNick == null) bNick = b.getName();
