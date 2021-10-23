@@ -44,8 +44,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
 
     String aNick = aFriend || isStaff ? null : Integration.getNick(a);
     String bNick = bFriend || isStaff ? null : Integration.getNick(b);
-    boolean aStaff = a.hasPermission(Permissions.STAFF) && aNick != null;
-    boolean bStaff = b.hasPermission(Permissions.STAFF) && bNick != null;
+    boolean aStaff = aNick == null && a.hasPermission(Permissions.STAFF);
+    boolean bStaff = bNick == null && b.hasPermission(Permissions.STAFF);
 
     // Staff take priority, as long as nick is visible
     if (aStaff && !bStaff) return -1;
@@ -58,8 +58,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     // that the other one does't have is first. Disguised players effectively have no perms.
     for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
       Permission permission = group.getPermission();
-      boolean aPerm = aNick != null && a.hasPermission(permission);
-      boolean bPerm = bNick != null && b.hasPermission(permission);
+      boolean aPerm = aNick == null && a.hasPermission(permission);
+      boolean bPerm = bNick == null && b.hasPermission(permission);
 
       if (aPerm && !bPerm) return -1;
       else if (bPerm && !aPerm) return 1;
