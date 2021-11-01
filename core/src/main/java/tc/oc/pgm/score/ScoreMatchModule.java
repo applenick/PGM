@@ -278,6 +278,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
     int wholePoints = (int) points;
     if (wholePoints < 1 || box.isSilent()) return;
 
+    match.callEvent(new PlayerScoreEvent(player, points));
+
     match.sendMessage(
         translatable(
             "scorebox.scored",
