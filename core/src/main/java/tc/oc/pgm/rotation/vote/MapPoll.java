@@ -39,6 +39,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.google.common.collect.Maps;
 
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.PlayerVoteEvent;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
@@ -226,6 +227,10 @@ public class MapPoll {
   public boolean toggleVote(MapInfo vote, UUID player) throws CommandException {
     Set<UUID> votes = this.votes.get(vote);
     if (votes == null) throw new CommandException(vote.getName() + " is not an option in the poll");
+
+    if (match.get() != null) {
+      match.get().callEvent(new PlayerVoteEvent(player, vote, !votes.contains(player)));
+    }
 
     if (votes.add(player)) return true;
     votes.remove(player);
