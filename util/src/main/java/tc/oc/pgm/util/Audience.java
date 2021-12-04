@@ -5,11 +5,13 @@ import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.kyori.adventure.platform.AudienceIdentity;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -35,10 +37,10 @@ public interface Audience extends ForwardingAudience.Single {
 
   static final String PATTERN = "\\<[@!].*?:[0-5]\\>";
 
-  ComponentRenderer<AudienceIdentity> RENDERER =
-      new ComponentRenderer<AudienceIdentity>() {
+  ComponentRenderer<Pointered> RENDERER =
+      new ComponentRenderer<Pointered>() {
         @Override
-        public Component render(Component component, final AudienceIdentity context) {
+        public Component render(Component component, final Pointered context) {
           component =
               component.replaceText(
                   TextReplacementConfig.builder()
@@ -57,7 +59,8 @@ public interface Audience extends ForwardingAudience.Single {
                           })
                       .build());
 
-          return GlobalTranslator.render(component, context.locale());
+          return GlobalTranslator.render(
+              component, context.get(Identity.LOCALE).orElse(Locale.ROOT));
         }
       };
 
