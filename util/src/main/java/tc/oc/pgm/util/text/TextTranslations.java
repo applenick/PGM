@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.platform.bukkit.BukkitIdentity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -288,7 +287,7 @@ public final class TextTranslations {
    */
   public static Component translate(Component text, Locale locale) {
     return GlobalTranslator.render(
-        Audience.RENDERER.render(text, new BukkitIdentity(Bukkit.getConsoleSender())), locale);
+        Audience.RENDERER.render(text, Audience.get(Bukkit.getConsoleSender())), locale);
   }
 
   /**
@@ -300,9 +299,7 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translateLegacy(Component text, @Nullable CommandSender sender) {
-    text =
-        Audience.RENDERER.render(
-            text, new BukkitIdentity(sender == null ? Bukkit.getConsoleSender() : sender));
+    text = Audience.RENDERER.render(text, Audience.get(sender));
     return LegacyComponentSerializer.legacySection().serialize(text);
   }
 
@@ -326,9 +323,7 @@ public final class TextTranslations {
   }
 
   public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
-    component =
-        Audience.RENDERER.render(
-            component, new BukkitIdentity(viewer == null ? Bukkit.getConsoleSender() : viewer));
+    component = Audience.RENDERER.render(component, Audience.get(viewer));
     return GsonComponentSerializer.colorDownsamplingGson().serialize(component);
   }
 }

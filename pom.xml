@@ -107,21 +107,19 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.8.1</version>
+            <version>4.9.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
-            <version>4.8.1</version>
+            <version>4.9.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <!-- 4.0.1-OCC-SNAPSHOT is just for local builds ;) -->
-            <!-- Per-User rendering was implemented, we'll update this asap -->
-            <version>4.0.1-OCC-SNAPSHOT</version>
+            <version>4.0.2-SNAPSHOT</version>
             <scope>compile</scope>
             <!-- Exclude Spigot APIs since we already provide Bukkit -->
             <exclusions>

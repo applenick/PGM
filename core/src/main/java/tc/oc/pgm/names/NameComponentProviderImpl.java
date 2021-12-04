@@ -4,9 +4,11 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.adventure.platform.AudienceIdentity;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -49,14 +51,15 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
   }
 
   @Override
-  public Component renderName(
-      Player player, String defName, NameStyle style, AudienceIdentity context) {
+  public Component renderName(Player player, String defName, NameStyle style, Pointered context) {
 
-    if (player == null && defName == null) {
+    Optional<UUID> audienceId = context.get(Identity.UUID);
+
+    if (player == null && defName == null || !audienceId.isPresent()) {
       return UNKNOWN;
     }
 
-    Player viewer = Bukkit.getPlayer(context.uuid());
+    Player viewer = Bukkit.getPlayer(audienceId.get());
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null) {
