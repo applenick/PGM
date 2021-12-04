@@ -7,7 +7,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import net.kyori.adventure.platform.AudienceIdentity;
+import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -29,7 +29,7 @@ public interface PlayerComponentProvider {
   static AtomicReference<PlayerComponentProvider> PROVIDER =
       new AtomicReference<PlayerComponentProvider>(new NoopNameComponentProvider());
 
-  static Component render(String id, NameStyle nameStyle, AudienceIdentity context) {
+  static Component render(String id, NameStyle nameStyle, Pointered context) {
     if (id == null) return CONSOLE;
 
     if (USERNAME_REGEX.matcher(id).matches()) {
@@ -46,12 +46,11 @@ public interface PlayerComponentProvider {
     }
   }
 
-  Component renderName(Player player, String defName, NameStyle style, AudienceIdentity context);
+  Component renderName(Player player, String defName, NameStyle style, Pointered context);
 
   public static class NoopNameComponentProvider implements PlayerComponentProvider {
     @Override
-    public Component renderName(
-        Player player, String defName, NameStyle style, AudienceIdentity context) {
+    public Component renderName(Player player, String defName, NameStyle style, Pointered context) {
       if (player == null && defName == null) return UNKNOWN;
       return text(player != null ? player.getDisplayName() : defName);
     }
