@@ -55,11 +55,11 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
 
     Optional<UUID> audienceId = context.get(Identity.UUID);
 
-    if (player == null && defName == null || !audienceId.isPresent()) {
+    if (player == null && defName == null) {
       return UNKNOWN;
     }
 
-    Player viewer = Bukkit.getPlayer(audienceId.get());
+    Player viewer = Bukkit.getPlayer(audienceId.orElse(null));
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null) {
