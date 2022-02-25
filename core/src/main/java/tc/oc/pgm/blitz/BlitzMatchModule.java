@@ -27,7 +27,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.TeamMatchModule;
 
