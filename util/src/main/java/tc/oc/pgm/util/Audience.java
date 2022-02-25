@@ -35,7 +35,7 @@ public interface Audience extends ForwardingAudience.Single {
     playSound(WARNING_SOUND);
   }
 
-  static final String PATTERN = "\\<[@!].*?:[0-5]\\>";
+  static final String PATTERN = "\\<[@!].*?:[0-" + NameStyle.values().length + "]\\>";
 
   ComponentRenderer<Pointered> RENDERER =
       new ComponentRenderer<Pointered>() {
