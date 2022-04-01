@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PlayerComponentProvider;
@@ -29,6 +31,76 @@ public interface Audience extends ForwardingAudience.Single {
 
   Sound WARNING_SOUND = sound(key("note.bass"), Sound.Source.MASTER, 1f, 0.75f);
   Component WARNING_MESSAGE = text(" \u26a0 ", NamedTextColor.YELLOW); // ⚠
+
+  static Random random = new Random();
+  static String[] RANDOM_SOUNDS = {
+    "dig.cloth",
+    "dig.glass",
+    "liquid.lavapop",
+    "note.bass",
+    "note.bassattack",
+    "note.hat",
+    "note.pling",
+    "note.snare",
+    "random.anvil_break",
+    "random.anvil_land",
+    "random.anvil_use",
+    "random.break",
+    "random.chestopen",
+    "random.chestclose",
+    "random.explode",
+    "creeper.primed",
+    "random.levelup",
+    "random.successful_hit",
+    "mob.bat.death",
+    "mob.blaze.breathe",
+    "mob.blaze.death",
+    "mob.blaze.hit",
+    "mob.cat.hiss",
+    "mob.cat.hitt",
+    "mob.cat.meow",
+    "mob.cat.purr",
+    "mob.cat.purreow",
+    "mob.chicken.hurt",
+    "mob.cow.hurt",
+    "mob.enderdragon.growl",
+    "mob.enderdragon.wings",
+    "mob.endermen.death",
+    "mob.endermen.hit",
+    "mob.endermen.scream",
+    "mob.ghast.affectionate_scream",
+    "mob.ghast.death",
+    "mob.ghast.fireball",
+    "mob.ghast.moan",
+    "mob.ghast.scream",
+    "mob.guardian.hit",
+    "mob.guardian.flop",
+    "mob.horse.angry",
+    "mob.horse.death",
+    "mob.irongolem.death",
+    "mob.pig.death",
+    "mob.magmacube.big",
+    "mob.villager.death",
+    "mob.spider.death",
+    "mob.zombie.say",
+    "mob.zombie.woodbreak",
+    "mob.wolf.bark",
+    "mob.wither.death",
+    "mob.wither.hurt",
+    "mob.wither.shoot",
+    "mob.skeleton.death"
+  };
+
+  static Sound getRandomSound() {
+    String randomKey = RANDOM_SOUNDS[random.nextInt(RANDOM_SOUNDS.length)];
+    float randomPitch = random.nextFloat() + 0.5f;
+    return sound(key(randomKey), Sound.Source.MASTER, 1f, randomPitch);
+  }
+
+  @Override
+  default void playSound(final @NotNull Sound sound) {
+    this.audience().playSound(getRandomSound());
+  }
 
   default void sendWarning(Component message) {
     sendMessage(WARNING_MESSAGE.append(message.colorIfAbsent(NamedTextColor.RED)));
