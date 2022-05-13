@@ -1,15 +1,13 @@
 package tc.oc.pgm.rotation.pools;
 
+import java.time.Duration;
 import java.util.Collection;
-import com.google.common.collect.Maps;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
-
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -18,7 +16,6 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
-import tc.oc.pgm.rotation.vote.VotePoolOptions;
 
 public class VotingPool extends MapPool {
 
@@ -36,19 +33,24 @@ public class VotingPool extends MapPool {
   private MapPoll currentPoll;
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    this(manager, section, name, null);
+    super(manager, section, name);
+    this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
+    this.mapPicker = MapVotePicker.of(manager, section);
+    for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 
   public VotingPool(
       MapPoolManager manager,
-      ConfigurationSection section,
+      String identifier,
       String name,
-      @Nullable VotePoolOptions existingOptions) {
-    super(manager, section, name);
-
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(manager, identifier, name, enabled, players, dynamic, cycleTime, maps);
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
-
-    this.mapPicker = MapVotePicker.of(manager, section);
+    this.mapPicker = MapVotePicker.of(manager, null);
     for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 
@@ -120,11 +122,10 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
 
               currentPoll =
-                      new MapPoll(
-                          match,
-                          mapPicker.getMaps(manager.getVoteOptions(), mapScores),
-                          manager.getVoteOptions());
-
+                  new MapPoll(
+                      match,
+                      mapPicker.getMaps(manager.getVoteOptions(), mapScores),
+                      manager.getVoteOptions());
             },
             5,
             TimeUnit.SECONDS);

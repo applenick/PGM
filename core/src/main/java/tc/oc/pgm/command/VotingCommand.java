@@ -48,7 +48,7 @@ public class VotingCommand {
       MapOrder mapOrder,
       Match match)
       throws CommandException {
-    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+    VotePoolOptions vote = getVoteOptions(sender.getBukkit(), mapOrder);
 
     Component addMessage =
         translatable(
