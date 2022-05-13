@@ -37,15 +37,15 @@ public class VotePoolOptions {
   }
 
   public boolean canAddVote() {
-    return customVoteMaps.size() < VotingPool.MAX_VOTE_OPTIONS;
+    return customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS;
   }
 
   public boolean addVote(MapInfo map, UUID playerId, boolean identify) {
-      if (customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS) {
-          this.customVoteMaps.add(new CustomVoteEntry(map, identify, playerId));
-          return true;
-      }
-      return false;
+    if (customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS) {
+      this.customVoteMaps.add(new CustomVoteEntry(map, identify, playerId));
+      return true;
+    }
+    return false;
   }
 
   public boolean removeMap(MapInfo map) {
@@ -84,8 +84,7 @@ public class VotePoolOptions {
   }
 
   public Map<MapInfo, Double> getCustomVoteMapWeighted() {
-      return customVoteMaps.stream()
-          .collect(Collectors.toMap(map -> map.getMap(), x -> VotingPool.DEFAULT_SCORE));
+    return customVoteMaps.stream()
+        .collect(Collectors.toMap(map -> map.getMap(), x -> VotingPool.DEFAULT_SCORE));
   }
-  
 }

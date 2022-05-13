@@ -1,5 +1,7 @@
 package tc.oc.pgm.rotation.pools;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
@@ -10,6 +12,18 @@ import tc.oc.pgm.rotation.MapPoolManager;
 public class Rotation extends MapPool {
 
   private int position;
+
+  public Rotation(
+      MapPoolManager manager,
+      String identifier,
+      String name,
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(manager, identifier, name, enabled, players, dynamic, cycleTime, maps);
+  }
 
   public Rotation(MapPoolManager manager, ConfigurationSection section, String identifier) {
     super(manager, section, identifier);
