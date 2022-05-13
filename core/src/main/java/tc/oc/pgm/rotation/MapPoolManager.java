@@ -57,6 +57,8 @@ public class MapPoolManager implements MapOrder {
   private int matchCountLimit = 0; // The limit for when to revert to dynamic pools
   private int matchCount = 0; // # of completed matches since start of pool
 
+  private boolean lockPool; // Whether the pool will ignore player count changing conditions
+
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
 
@@ -155,8 +157,12 @@ public class MapPoolManager implements MapOrder {
     return mapPools.keySet().stream().sorted().collect(Collectors.toList());
   }
 
+  public boolean isLocked() {
+    return lockPool;
+  }
+
   private void updateActiveMapPool(MapPool mapPool, Match match) {
-    updateActiveMapPool(mapPool, match, false, null, null, 0);
+    updateActiveMapPool(mapPool, match, false, null, null, 0, false);
   }
 
   public void updateActiveMapPool(
@@ -165,8 +171,11 @@ public class MapPoolManager implements MapOrder {
       boolean force,
       @Nullable CommandSender sender,
       @Nullable Duration timeLimit,
-      int matchLimit) {
+      int matchLimit,
+      boolean lock) {
     saveMapPools();
+
+    this.lockPool = lock;
 
     if (mapPool == activeMapPool) return;
 
@@ -284,7 +293,7 @@ public class MapPoolManager implements MapOrder {
       return;
     }
 
-    if (activeMapPool.isDynamic() || shouldRevert(match)) {
+    if ((activeMapPool.isDynamic() || shouldRevert(match)) && !isLocked()) {
       getAppropriateDynamicPool(match).ifPresent(pool -> updateActiveMapPool(pool, match));
     }
 

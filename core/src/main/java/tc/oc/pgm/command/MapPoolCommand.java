@@ -18,7 +18,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
@@ -206,8 +209,9 @@ public final class MapPoolCommand {
   @Command(
       aliases = {"setpool"},
       desc = "Change the map pool",
-      usage = "[pool name] -r (revert to dynamic) -t (time limit for map pool) -m (match # limit)",
-      flags = "rtm",
+      usage =
+          "[pool name] -r (revert to dynamic) -t (time limit for map pool) -m (match # limit) -l (lock pool)",
+      flags = "rtml",
       perms = Permissions.SETNEXT)
   public void setPool(
       Audience sender,
@@ -217,17 +221,43 @@ public final class MapPoolCommand {
       @Nullable String poolName,
       @Switch('r') boolean reset,
       @Switch('t') Duration timeLimit,
-      @Switch('m') Integer matchLimit)
+      @Switch('m') Integer matchLimit,
+      @Switch('l') boolean lock)
       throws CommandException {
     if (!match.getCountdown().getAll(CycleCountdown.class).isEmpty()) {
       sender.sendMessage(translatable("admin.setPool.activeCycle", NamedTextColor.RED));
       return;
     }
+
     MapPoolManager mapPoolManager = getMapPoolManager(source, mapOrder);
     MapPool newPool =
         reset
             ? mapPoolManager.getAppropriateDynamicPool(match).orElse(null)
             : mapPoolManager.getMapPoolByName(poolName);
+
+    // Send error when locked
+    if (mapPoolManager.isLocked() && lock == mapPoolManager.isLocked()) {
+      Component error =
+          translatable(
+              "pool.locked",
+              text(mapPoolManager.getActiveMapPool().getName(), NamedTextColor.GOLD));
+
+      Component button =
+          text()
+              .append(text(" ["))
+              .append(translatable("pool.locked.button", NamedTextColor.GREEN, TextDecoration.BOLD))
+              .append(text("]"))
+              .hoverEvent(
+                  HoverEvent.showText(translatable("pool.locked.hover", NamedTextColor.GREEN)))
+              .clickEvent(ClickEvent.runCommand("/setpool -l"))
+              .color(NamedTextColor.GRAY)
+              .build();
+
+      Component message = text().append(error).append(button).build();
+
+      sender.sendWarning(message);
+      return;
+    }
 
     if (newPool == null) {
       sender.sendWarning(translatable(reset ? "pool.noDynamic" : "pool.noPoolMatch"));
@@ -242,7 +272,7 @@ public final class MapPoolCommand {
       }
 
       mapPoolManager.updateActiveMapPool(
-          newPool, match, true, source, timeLimit, matchLimit != null ? matchLimit : 0);
+          newPool, match, true, source, timeLimit, matchLimit != null ? matchLimit : 0, lock);
     }
   }
 
