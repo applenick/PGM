@@ -1,12 +1,10 @@
 package tc.oc.pgm.rotation.pools;
 
-import java.util.Collection;
+import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -15,7 +13,6 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
-import tc.oc.pgm.rotation.vote.VotePoolOptions;
 
 public class VotingPool extends MapPool {
 
@@ -32,20 +29,25 @@ public class VotingPool extends MapPool {
 
   private MapPoll currentPoll;
 
-  public VotingPool(MapPoolManager manager, ConfigurationSection section, String id) {
-    this(manager, section, id, null);
+  public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
+    super(manager, section, name);
+    this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
+    this.mapPicker = MapVotePicker.of(manager, section);
+    for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 
   public VotingPool(
       MapPoolManager manager,
-      ConfigurationSection section,
+      String identifier,
       String name,
-      @Nullable VotePoolOptions existingOptions) {
-    super(manager, section, name);
-
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(manager, identifier, name, enabled, players, dynamic, cycleTime, maps);
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
-
-    this.mapPicker = MapVotePicker.of(manager, section);
+    this.mapPicker = MapVotePicker.of(manager, null);
     for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 
@@ -67,12 +69,6 @@ public class VotingPool extends MapPool {
                 ? Math.max(value - ADJUST_FACTOR, DEFAULT_SCORE)
                 : Math.min(value + ADJUST_FACTOR, DEFAULT_SCORE));
     mapScores.put(currentMap, 0d);
-  }
-
-  private void updateScores(Map<MapInfo, Set<UUID>> votes) {
-    double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
-    if (voters == 0) return; // Literally no one voted
-    votes.forEach((m, v) -> mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE)));
   }
 
   @Override
@@ -116,12 +112,10 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
 
               currentPoll =
-                  manager.getVoteOptions().shouldOverride()
-                      ? new MapPoll(
-                          match,
-                          manager.getVoteOptions().getCustomVoteMaps(),
-                          manager.getVoteOptions().getOverrideMaps())
-                      : new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+                  new MapPoll(
+                      match,
+                      mapPicker.getMaps(manager.getVoteOptions(), mapScores),
+                      manager.getVoteOptions());
             },
             5,
             TimeUnit.SECONDS);

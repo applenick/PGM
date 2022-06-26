@@ -12,7 +12,6 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import app.ashcon.intake.CommandException;
-import com.google.common.collect.Maps;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Comparator;
@@ -36,6 +35,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.PlayerVoteEvent;
 import tc.oc.pgm.api.integration.Integration;
@@ -72,17 +72,13 @@ public class MapPoll {
   private final WeakReference<Match> match;
 
   private final Map<MapInfo, Set<UUID>> votes;
-  private final Map<MapInfo, UUID> overrides;
+  private final VotePoolOptions options;
   private boolean running = true;
 
-  public MapPoll(Match match, List<MapInfo> maps) {
-    this(match, maps, Maps.newHashMap());
-  }
-
-  public MapPoll(Match match, List<MapInfo> maps, Map<MapInfo, UUID> overrides) {
+  public MapPoll(Match match, List<MapInfo> maps, VotePoolOptions voteOptions) {
     this.match = new WeakReference<>(match);
     this.votes = new HashMap<>();
-    this.overrides = overrides;
+    this.options = voteOptions;
     maps.forEach(m -> votes.put(m, new HashSet<>()));
 
     match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
@@ -124,7 +120,7 @@ public class MapPoll {
   }
 
   private Component getOverridePlayer(MapInfo map) {
-    UUID playerId = overrides.get(map);
+    UUID playerId = options.getOverrideMaps().get(map);
     Component playerName = null;
     Player bukkit = Bukkit.getPlayer(playerId);
 
@@ -192,6 +188,7 @@ public class MapPoll {
         text(
             map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
             NamedTextColor.YELLOW));
+
     if (identified != null) {
       hover
           .append(
