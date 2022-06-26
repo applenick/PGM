@@ -6,11 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import javax.annotation.Nullable;
-
 import org.bukkit.configuration.ConfigurationSection;
-
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -108,24 +105,25 @@ public class VotingPool extends MapPool {
 
   @Override
   public void matchEnded(Match match) {
-      tickScores(match.getMap());
-      match
-      .getExecutor(MatchScope.LOADED)
-      .schedule(
-              () -> {
-                  // Start poll here, to avoid starting it if you set next another map.
-                  if (manager.getOverriderMap() != null) return;
-                  // If there is a restart queued, don't start a vote
-                  if (RestartManager.isQueued()) return;
+    tickScores(match.getMap());
+    match
+        .getExecutor(MatchScope.LOADED)
+        .schedule(
+            () -> {
+              // Start poll here, to avoid starting it if you set next another map.
+              if (manager.getOverriderMap() != null) return;
+              // If there is a restart queued, don't start a vote
+              if (RestartManager.isQueued()) return;
 
-                  currentPoll = manager.getVoteOptions().shouldOverride()
-                          ? new MapPoll(match, manager.getVoteOptions().getCustomVoteMaps(),
-                                  manager.getVoteOptions().getOverrideMaps())
-                                  :
-                                      new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
-
-              },
-              5,
-              TimeUnit.SECONDS);
+              currentPoll =
+                  manager.getVoteOptions().shouldOverride()
+                      ? new MapPoll(
+                          match,
+                          manager.getVoteOptions().getCustomVoteMaps(),
+                          manager.getVoteOptions().getOverrideMaps())
+                      : new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+            },
+            5,
+            TimeUnit.SECONDS);
   }
 }

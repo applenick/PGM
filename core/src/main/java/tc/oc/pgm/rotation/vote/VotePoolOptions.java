@@ -2,7 +2,6 @@ package tc.oc.pgm.rotation.vote;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,8 @@ public class VotePoolOptions {
   }
 
   public List<MapInfo> getCustomVoteMaps() {
-    return new ArrayList<>(customVoteMaps.stream().map(CustomVoteEntry::getMap).collect(Collectors.toSet()));
+    return new ArrayList<>(
+        customVoteMaps.stream().map(CustomVoteEntry::getMap).collect(Collectors.toSet()));
   }
 
   public boolean isAdded(MapInfo info) {
@@ -84,6 +84,7 @@ public class VotePoolOptions {
   }
 
   public Map<MapInfo, Double> getCustomVoteMapWeighted() {
-    return customVoteMaps.stream().collect(Collectors.toMap(map -> map.getMap(), x -> VotingPool.DEFAULT_SCORE));
+    return customVoteMaps.stream()
+        .collect(Collectors.toMap(map -> map.getMap(), x -> VotingPool.DEFAULT_SCORE));
   }
 }

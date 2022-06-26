@@ -12,6 +12,7 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import app.ashcon.intake.CommandException;
+import com.google.common.collect.Maps;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Comparator;
@@ -35,9 +36,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import com.google.common.collect.Maps;
-
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.PlayerVoteEvent;
 import tc.oc.pgm.api.integration.Integration;
@@ -72,15 +70,15 @@ public class MapPoll {
   static final ItemTag<String> VOTE_BOOK_TAG = ItemTag.newString(VOTE_BOOK_METADATA);
 
   private final WeakReference<Match> match;
-  
+
   private final Map<MapInfo, Set<UUID>> votes;
   private final Map<MapInfo, UUID> overrides;
   private boolean running = true;
 
   public MapPoll(Match match, List<MapInfo> maps) {
-      this(match, maps, Maps.newHashMap());
+    this(match, maps, Maps.newHashMap());
   }
-  
+
   public MapPoll(Match match, List<MapInfo> maps, Map<MapInfo, UUID> overrides) {
     this.match = new WeakReference<>(match);
     this.votes = new HashMap<>();
@@ -88,7 +86,7 @@ public class MapPoll {
     maps.forEach(m -> votes.put(m, new HashSet<>()));
 
     match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
-    match.getPlayers().forEach(viewer -> sendBook(viewer, false));    
+    match.getPlayers().forEach(viewer -> sendBook(viewer, false));
   }
 
   public void announceWinner(MatchPlayer viewer, MapInfo winner) {
@@ -287,13 +285,11 @@ public class MapPoll {
     running = false;
     MapInfo picked = getMostVotedMap();
     Match match = this.match.get();
-    
-    if (match != null) 
-      match.getPlayers().forEach(player -> announceWinner(player, picked));
 
-    if (picked != null)
-      match.callEvent(new MapVoteWinnerEvent(picked));
-    
+    if (match != null) match.getPlayers().forEach(player -> announceWinner(player, picked));
+
+    if (picked != null) match.callEvent(new MapVoteWinnerEvent(picked));
+
     return picked;
   }
 
