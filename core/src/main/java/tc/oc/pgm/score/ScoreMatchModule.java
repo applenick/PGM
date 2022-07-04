@@ -8,6 +8,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.Lists;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +70,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     match.addVictoryCondition(new ScoreVictoryCondition());
+  }
+
+  public Map<UUID, Double> getContributions() {
+    return Collections.unmodifiableMap(contributions);
   }
 
   public boolean hasScoreLimit() {
