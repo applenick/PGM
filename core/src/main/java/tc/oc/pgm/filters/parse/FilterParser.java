@@ -58,6 +58,7 @@ import tc.oc.pgm.filters.matcher.player.LivesFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerClassFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
+import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
 import tc.oc.pgm.filters.matcher.player.WearingItemFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.PlayerBlockQueryModifier;
@@ -378,6 +379,27 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("grounded")
   public GroundedFilter parseGrounded(Element el) throws InvalidXMLException {
     return GroundedFilter.INSTANCE;
+  }
+
+  @MethodParser("alive")
+  public PlayerStateFilter parseAlive(Element el) throws InvalidXMLException {
+    return PlayerStateFilter.ALIVE;
+  }
+
+  @MethodParser("dead")
+  public PlayerStateFilter parseDead(Element el) throws InvalidXMLException {
+    return PlayerStateFilter.DEAD;
+  }
+
+  private <T extends FeatureDefinition> XMLFeatureReference<T> reference(Node node, Class<T> cls) {
+    return this.factory.getFeatures().createReference(node, cls);
+  }
+
+  private <T extends FeatureDefinition> Optional<XMLFeatureReference<T>> optionalReference(
+      Node node, Class<T> cls) {
+    return node == null
+        ? Optional.empty()
+        : Optional.of(this.factory.getFeatures().createReference(node, cls));
   }
 
   private Filter parseExplicitTeam(Element el, CompetitorFilter filter) throws InvalidXMLException {
