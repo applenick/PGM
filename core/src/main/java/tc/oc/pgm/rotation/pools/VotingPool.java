@@ -85,7 +85,10 @@ public class VotingPool extends MapPool {
     if (currentPoll == null) return getRandom();
 
     MapInfo map = currentPoll.finishVote();
-    updateScores(currentPoll.getVotes());
+    // Only update scores when no custom maps are added to the vote
+    if (!currentPoll.isCustom()) {
+      updateScores(currentPoll.getVotes());
+    }
     manager.getVoteOptions().clear();
     currentPoll = null;
     return map != null ? map : getRandom();

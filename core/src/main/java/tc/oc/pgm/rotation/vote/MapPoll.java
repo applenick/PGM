@@ -296,4 +296,8 @@ public class MapPoll {
   public Map<MapInfo, Set<UUID>> getVotes() {
     return votes;
   }
+
+  public boolean isCustom() {
+    return !options.getCustomVoteMaps().isEmpty();
+  }
 }
