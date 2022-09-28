@@ -47,6 +47,7 @@ public class Tribute implements Competitor {
   private final ChatColor chatColor;
   private final Color color;
   private final PartyQuery query;
+  private NameTagVisibility nameTagVisibility;
 
   protected @Nullable MatchPlayer player;
   protected List<MatchPlayer> players = Collections.emptyList();
@@ -59,6 +60,7 @@ public class Tribute implements Competitor {
     this.chatColor = color == null ? ChatColor.YELLOW : color;
     this.color = BukkitUtils.colorOf(this.chatColor);
     this.query = new PartyQuery(null, this);
+    this.nameTagVisibility = ffa.getOptions().nameTagVisibility;
   }
 
   @Override
@@ -118,7 +120,12 @@ public class Tribute implements Competitor {
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return this.ffa.getOptions().nameTagVisibility;
+    return nameTagVisibility;
+  }
+
+  @Override
+  public void setNameTagVisibility(NameTagVisibility visibility) {
+    this.nameTagVisibility = visibility;
   }
 
   @Override
