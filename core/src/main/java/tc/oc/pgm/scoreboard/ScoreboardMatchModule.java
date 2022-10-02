@@ -250,6 +250,14 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
     changePlayerScoreboard(event.getPlayer(), event.getOldParty(), event.getNewParty());
   }
 
+  public void updateAll() {
+    for (Party party : match.getParties()) {
+      if (party instanceof Competitor) {
+        updatePartyScoreboardTeam(party);
+      }
+    }
+  }
+
   private static String toString(Scoreboard scoreboard) {
     return scoreboard == null
         ? "null"
