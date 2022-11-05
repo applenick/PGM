@@ -26,7 +26,8 @@ public enum SettingKey {
       Arrays.asList("death", "dms"),
       Material.SKULL_ITEM,
       DEATH_ALL,
-      DEATH_OWN), // Changes which death messages are seen
+      DEATH_OWN,
+      DEATH_FRIENDS), // Changes which death messages are seen
   PICKER(
       "picker",
       Material.LEATHER_HELMET,
@@ -37,13 +38,20 @@ public enum SettingKey {
       Arrays.asList("join", "jms"),
       Material.WOOD_DOOR,
       JOIN_ON,
-      JOIN_OFF), // Changes if join messages are seen
+      JOIN_OFF,
+      JOIN_FRIENDS), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
       Material.BOOK_AND_QUILL,
       MESSAGE_ON,
-      MESSAGE_OFF), // Changes if direct messages are accepted
-  OBSERVERS(Arrays.asList("observers", "obs"), Material.EYE_OF_ENDER, OBSERVERS_ON, OBSERVERS_OFF) {
+      MESSAGE_OFF,
+      MESSAGE_FRIEND), // Changes if direct messages are accepted
+  OBSERVERS(
+      Arrays.asList("observers", "obs"),
+      Material.EYE_OF_ENDER,
+      OBSERVERS_ON,
+      OBSERVERS_OFF,
+      OBSERVERS_FRIEND) {
     @Override
     public void update(MatchPlayer player) {
       player.resetVisibility();
@@ -71,8 +79,12 @@ public enum SettingKey {
     public void update(MatchPlayer player) {
       PlayerTimeMatchModule.updatePlayerTime(player);
     }
-  }; // Changes player preference for time of day
-  ;
+  }, // Changes player preference for time of day
+  TRANSLATE(
+      "translate",
+      Material.HOPPER,
+      TRANSLATE_ON,
+      TRANSLATE_OFF); // Changes whether chat is auto-translated or not
 
   private final List<String> aliases;
   private final SettingValue[] values;

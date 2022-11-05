@@ -93,8 +93,6 @@ import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
 import tc.oc.pgm.command.parsers.VictoryConditionParser;
-import tc.oc.pgm.community.command.ModerationCommand;
-import tc.oc.pgm.community.command.ReportCommand;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.teams.Team;
@@ -220,12 +218,6 @@ public class CommandGraph {
     register(new VotingCommand());
     register(new MapDevCommand());
 
-    if (pgm.getConfiguration().isCommunityMode()) {
-      register(new ReportCommand());
-      register(new ModerationCommand());
-    }
-
-    register(pgm.getVanishManager());
     register(ChatDispatcher.get());
   }
 

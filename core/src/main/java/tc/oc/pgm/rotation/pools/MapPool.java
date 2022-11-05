@@ -20,8 +20,8 @@ import tc.oc.pgm.rotation.MapPoolManager;
 /** Rotation of maps, a type of {@link MapOrder} */
 public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final MapPoolManager manager;
-  protected final ConfigurationSection configSection;
 
+  protected final String identifier;
   protected final String name;
   protected final boolean enabled;
   protected final List<MapInfo> maps;
@@ -46,31 +46,60 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     }
   }
 
-  MapPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    this.manager = manager;
-    this.configSection = section;
-    this.name = name;
-    this.enabled = section.getBoolean("enabled");
-    this.players = section.getInt("players");
-    this.dynamic = section.getBoolean("dynamic", true);
-    this.cycleTime = parseDuration(section.getString("cycle-time", "-1s"));
+  MapPool(MapPoolManager manager, ConfigurationSection section, String identifier) {
+    this(
+        manager,
+        identifier,
+        section.getString("display-name", identifier),
+        section.getBoolean("enabled"),
+        section.getInt("players"),
+        section.getBoolean("dynamic", true),
+        parseDuration(section.getString("cycle-time", "-1s")),
+        parseMapList(identifier, section));
+  }
 
+  MapPool(
+      MapPoolManager manager,
+      String identifier,
+      String name,
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> mapList) {
+
+    this.manager = manager;
+    this.identifier = identifier;
+    this.name = name;
+    this.enabled = enabled;
+    this.players = players;
+    this.dynamic = dynamic;
+    this.cycleTime = cycleTime;
+    this.maps = mapList;
+  }
+
+  public static List<MapInfo> parseMapList(String identifier, ConfigurationSection section) {
     MapLibrary library = PGM.get().getMapLibrary();
     List<MapInfo> mapList =
         section.getStringList("maps").stream()
-            .map(mapName -> getMap(library, mapName))
+            .map(mapName -> getMap(identifier, library, mapName))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    this.maps = Collections.unmodifiableList(mapList);
+
+    return Collections.unmodifiableList(mapList);
   }
 
-  private MapInfo getMap(MapLibrary library, String mapName) {
+  private static MapInfo getMap(String poolName, MapLibrary library, String mapName) {
     @Nullable MapInfo map = library.getMap(mapName);
     if (map != null) return map;
     PGM.get()
         .getLogger()
-        .warning("[MapPool] [" + name + "] " + mapName + " not found in map repo. Ignoring...");
+        .warning("[MapPool] [" + poolName + "] " + mapName + " not found in map repo. Ignoring...");
     return null;
+  }
+
+  public String getIdentifier() {
+    return identifier;
   }
 
   public String getName() {
